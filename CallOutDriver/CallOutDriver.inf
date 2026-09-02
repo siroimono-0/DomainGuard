@@ -1,0 +1,41 @@
+[Version]
+Signature   = "$WINDOWS NT$"
+Class       = WFPCALLOUTS
+ClassGuid   = {57465043-616C-6C6F-7574-5F636C617373}
+Provider    = %ProviderName%
+DriverVer   = 09/01/2026,1.0.0.0
+CatalogFile = CallOutDriver.cat
+PnpLockdown = 1
+
+[DestinationDirs]
+CallOutDriver.DriverFiles = 13
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+CallOutDriver.sys = 1,,
+
+[DefaultInstall.NTamd64]
+OptionDesc = %ServiceDescription%
+CopyFiles  = CallOutDriver.DriverFiles
+
+[DefaultInstall.NTamd64.Services]
+AddService = %ServiceName%,,CallOutDriver.Service
+
+[CallOutDriver.DriverFiles]
+CallOutDriver.sys
+
+[CallOutDriver.Service]
+DisplayName   = %ServiceName%
+Description   = %ServiceDescription%
+ServiceType   = 1
+StartType     = 3
+ErrorControl  = 1
+ServiceBinary = %13%\CallOutDriver.sys
+
+[Strings]
+ProviderName       = "DomainGuard"
+DiskName           = "DomainGuard Installation Disk"
+ServiceName        = "CallOutDriver"
+ServiceDescription = "DomainGuard WFP Callout Driver"

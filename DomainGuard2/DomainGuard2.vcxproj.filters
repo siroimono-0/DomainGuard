@@ -1,0 +1,222 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Controller">
+      <UniqueIdentifier>{bb84d989-8f09-4631-9aad-4851936d9c1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Service">
+      <UniqueIdentifier>{57ac259a-e32b-4c02-9448-ee55eada623d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SQLITE">
+      <UniqueIdentifier>{7ddc0649-727f-40c7-9153-e1d66458f953}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model">
+      <UniqueIdentifier>{28ea7833-52f5-471c-9efb-d14bb8d8e0e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Service\DNS">
+      <UniqueIdentifier>{e83181d4-2357-45c6-a909-cd8af902183c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Service\WFP">
+      <UniqueIdentifier>{7045735f-c6c7-4742-904d-69e4a42c183e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Service\CalloutDriverClient">
+      <UniqueIdentifier>{14891927-6b21-4acc-93d8-8d113aec14bf}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DomainGuard2.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MainFrm.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="DomainGuard2Doc.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="DomainGuard2View.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="AppContext.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller\Controller.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="Service\SQLITE.h">
+      <Filter>Service</Filter>
+    </ClInclude>
+    <ClInclude Include="Service\ResultQ_SQLITE.h">
+      <Filter>Service</Filter>
+    </ClInclude>
+    <ClInclude Include="Service\WK_SQLITE.h">
+      <Filter>Service</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLITE\sqlite3.h">
+      <Filter>SQLITE</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Dia_INSERT.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\DomainBlockModel.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="CBlockListCtrl.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Service\DNS\DNS.h">
+      <Filter>Service\DNS</Filter>
+    </ClInclude>
+    <ClInclude Include="Service\DNS\WK_DNS.h">
+      <Filter>Service\DNS</Filter>
+    </ClInclude>
+    <ClInclude Include="Service\DNS\WK_DNS_GQCS.h">
+      <Filter>Service\DNS</Filter>
+    </ClInclude>
+    <ClInclude Include="Service\DNS\ProxyID_Store.h">
+      <Filter>Service\DNS</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\DNSLogItemModel.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="CDomainLogListCtrl.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Service\WFP\WFP.h">
+      <Filter>Service\WFP</Filter>
+    </ClInclude>
+    <ClInclude Include="Dia_WFP.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CWFPListCtrl.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\WFPModel.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Service\CalloutDriverClient\CalloutDriverClient.h">
+      <Filter>Service\CalloutDriverClient</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DomainGuard2.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MainFrm.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="DomainGuard2Doc.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="DomainGuard2View.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="AppContext.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller\Controller.cpp">
+      <Filter>Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\SQLITE.cpp">
+      <Filter>Service</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\ResultQ_SQLITE.cpp">
+      <Filter>Service</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\WK_SQLITE.cpp">
+      <Filter>Service</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLITE\sqlite3.c">
+      <Filter>SQLITE</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Dia_INSERT.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\DomainBlockModel.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="CBlockListCtrl.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\DNS\DNS.cpp">
+      <Filter>Service\DNS</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\DNS\WK_DNS.cpp">
+      <Filter>Service\DNS</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\DNS\WK_DNS_GQCS.cpp">
+      <Filter>Service\DNS</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\DNS\ProxyID_Store.cpp">
+      <Filter>Service\DNS</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\DNSLogItemModel.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="CDomainLogListCtrl.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\WFP\WFP.cpp">
+      <Filter>Service\WFP</Filter>
+    </ClCompile>
+    <ClCompile Include="Dia_WFP.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CWFPListCtrl.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\WFPModel.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\CalloutDriverClient\CalloutDriverClient.cpp">
+      <Filter>Service\CalloutDriverClient</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="DomainGuard2.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\DomainGuard2.rc2">
+      <Filter>리소스 파일</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\DomainGuard2Doc.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\DomainGuard2.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\Toolbar.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
