@@ -5,6 +5,7 @@
 #include "CBlockListCtrl.h"
 #include "CDomainLogListCtrl.h"
 #include "CWFPListCtrl.h"
+#include "CDriverLogCtrl.h"
 
 #pragma once
 class Controller;
@@ -74,6 +75,8 @@ public:
 	afx_msg void OnWfpAdd();
 
 	CWFPListCtrl WFPListCtrl;
+	afx_msg void OnTestTest();
+	CDriverLogCtrl driverLogCtrl;
 };
 
 #ifndef _DEBUG  // DomainGuard2View.cpp의 디버그 버전

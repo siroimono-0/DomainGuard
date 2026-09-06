@@ -3,6 +3,7 @@
 #include <WS2tcpip.h>
 #include <WinSock2.h>
 
+#include "../../../SharedIoctl/SharedIoctl.h"
 #include "../../Model/WFPModel.h"
 
 
@@ -22,6 +23,204 @@ WFP::~WFP()
 	this->h_engine = nullptr;
 	return;
 }
+
+void WFP::registerSniFilter()
+{
+	DWORD ret2 = ::FwpmTransactionBegin0(this->h_engine, 0);
+	if (ret2 != ERROR_SUCCESS)
+	{
+		goto Abort;
+	}
+
+	DWORD ret_Callout_V4 =
+		this->addSniCallout(GUID_Callout_V4,
+			FWPM_LAYER_STREAM_V4,
+			&this->sniCalloutId_V4);
+
+	if (ret_Callout_V4 != ERROR_SUCCESS)
+	{
+		CString msg;
+		msg.Format(L"V4 콜아웃 추가 실패: 0x%08X", ret_Callout_V4);
+		AfxMessageBox(msg);
+
+		goto Abort;
+	}
+
+	DWORD ret_Callout_V6 =
+		this->addSniCallout(GUID_Callout_V6,
+			FWPM_LAYER_STREAM_V6,
+			&this->sniCalloutId_V6);
+
+	if ( ret_Callout_V6 != ERROR_SUCCESS)
+	{
+		CString msg;
+		msg.Format(L"V4 콜아웃 추가 실패: 0x%08X", ret_Callout_V6 );
+		AfxMessageBox(msg);
+
+		goto Abort;
+	}
+
+	DWORD ret_SniStreamFilter_V4 =
+		this->addSniStreamFilter(
+			GUID_Callout_V4,
+			FWPM_LAYER_STREAM_V4,
+			&this->sniStreamFilterId_V4);
+
+	if (ret_SniStreamFilter_V4  != ERROR_SUCCESS)
+	{
+		CString msg;
+		msg.Format(L"V4 콜아웃 추가 실패: 0x%08X", ret_SniStreamFilter_V4 );
+		AfxMessageBox(msg);
+
+		goto Abort;
+	}
+
+	DWORD ret_SniStreamFilter_V6 =
+		this->addSniStreamFilter(
+			GUID_Callout_V6,
+			FWPM_LAYER_STREAM_V6,
+			&this->sniStreamFilterId_V6);
+
+	if (ret_SniStreamFilter_V6  != ERROR_SUCCESS)
+	{
+		CString msg;
+		msg.Format(L"V6 콜아웃 추가 실패: 0x%08X", ret_SniStreamFilter_V6);
+		AfxMessageBox(msg);
+
+		goto Abort;
+	}
+
+	DWORD ret5 = ::FwpmTransactionCommit0(this->h_engine);
+	if (ret5 != ERROR_SUCCESS)
+	{
+		goto Abort;
+	}
+
+	return;
+
+Abort:
+	::FwpmTransactionAbort0(this->h_engine);
+	this->sniCalloutId_V4 = 0;
+	this->sniCalloutId_V6 = 0;
+	this->sniStreamFilterId_V4 = 0;
+	this->sniStreamFilterId_V6 = 0;
+	TRACE(
+		L"SNI registration aborted\n"
+	);
+	return;
+}
+
+DWORD WFP::addSniCallout(const GUID GUID_Callout,
+	const GUID GUID_Layer_Stream,
+	UINT32* sniCalloutId)
+{
+	FWPM_CALLOUT0 callout{};
+	callout.calloutKey = GUID_Callout;
+	callout.applicableLayer = GUID_Layer_Stream;
+
+	callout.displayData.name =
+		const_cast<PWSTR>(
+			L"DomainGuard HTTPS SNI Callout"
+			);
+
+	callout.displayData.description =
+		const_cast<PWSTR>(
+			L"Inspects TLS ClientHello SNI"
+			);
+
+	DWORD ret =
+		::FwpmCalloutAdd0(
+			this->h_engine,
+			&callout,
+			nullptr,
+			sniCalloutId);
+
+	if (ret != ERROR_SUCCESS)
+	{
+		TRACE(_T("addSniCallout ___ FwpmCalloutAdd0 ___ %d"),
+			::GetLastError());
+		return ret;
+	}
+	return ERROR_SUCCESS;
+}
+
+DWORD WFP::addSniStreamFilter(const GUID GUID_Callout,
+	const GUID GUID_Layer_Stream,
+	UINT64* sniStreamFilterId)
+{
+	FWPM_FILTER_CONDITION0 condition[2] = { 0 };
+	condition[0].fieldKey = FWPM_CONDITION_IP_REMOTE_PORT;
+
+	condition[0].matchType = FWP_MATCH_EQUAL;
+
+	condition[0].conditionValue.type = FWP_UINT16;
+	condition[0].conditionValue.uint16 = 443;
+
+	condition[1].fieldKey = FWPM_CONDITION_DIRECTION;
+	condition[1].matchType = FWP_MATCH_EQUAL;
+	condition[1].conditionValue.type = FWP_UINT32;
+	condition[1].conditionValue.uint32 = FWP_DIRECTION_OUTBOUND;
+
+	FWPM_FILTER filter = { 0 };
+	filter.displayData.name =
+		const_cast<PWSTR>(
+			L"DomainGuard HTTPS SNI Stream Filter"
+			);
+
+	filter.displayData.description =
+		const_cast<PWSTR>(
+			L"Sends outbound TLS traffic to SNI callout"
+			);
+
+	filter.layerKey = GUID_Layer_Stream;
+	filter.subLayerKey = GUID_WFP;
+	filter.numFilterConditions = ARRAYSIZE(condition);
+	filter.filterCondition = condition;
+	/*
+	* 드라이버가 등록되지 않은 상태에서는
+	* 인터넷 전체 차단으로 처리하지 않고 허용
+	*/
+	filter.flags = FWPM_FILTER_FLAG_PERMIT_IF_CALLOUT_UNREGISTERED;
+
+	/*
+	* 필터가 매칭되면 드라이버 콜아웃을 호출한다.
+	*
+	* 드라이버에서
+	* FWPS_STREAM_ACTION_DROP_CONNECTION을 사용하려면
+	* CALLOUT_UNKNOWN으로 등록해야 한다.
+	*/
+	filter.action.type = FWP_ACTION_CALLOUT_UNKNOWN;
+	filter.action.calloutKey = GUID_Callout;
+
+	filter.weight.type = FWP_EMPTY;
+
+	DWORD ret = ::FwpmFilterAdd0(
+		this->h_engine,
+		&filter,
+		nullptr,
+		sniStreamFilterId);
+
+
+	if (ret != ERROR_SUCCESS)
+	{
+		TRACE(
+			L"FwpmFilterAdd0 SNI ERR: 0x%08X\n",
+			ret
+		);
+
+		*sniStreamFilterId = 0;
+		return ret;
+	}
+
+	TRACE(
+		L"SNI stream filter registered: %llu\n",
+		*sniStreamFilterId
+	);
+
+	return ERROR_SUCCESS;
+}
+
+
 
 void WFP::init()
 {
@@ -63,6 +262,8 @@ void WFP::init()
 		TRACE(_T("\nFwpmSubLayerAdd0 ___ ERR ___ %d\n"), ret2);
 	}
 
+	// ================= DNS 우회 차단 등록 ================= 
+	// ================= DNS 우회 차단 등록 ================= 
 	wfpFileInfo info;
 	info.filePath = this->init_Path;
 	info._DirectionType = DirectionType::out;
@@ -81,7 +282,55 @@ void WFP::init()
 
 	this->addFile(info);
 	this->addFile(info2);
+	// ================= DNS 우회 차단 등록 ================= 
+	// ================= DNS 우회 차단 등록 ================= 
 
+	this->registerSniFilter();
+
+	// V4, V6 콜아웃이 실제 커널에 등록되어 있는지 확인
+	const GUID* keys[] = {
+		&GUID_Callout_V4,
+		&GUID_Callout_V6
+	};
+
+	for (int i = 0; i < 2; ++i)
+	{
+		FWPM_CALLOUT0* info = nullptr;
+
+		DWORD ret = FwpmCalloutGetByKey0(
+			this->h_engine, // 현재 WFP 엔진
+			keys[i],        // 조회할 콜아웃 GUID
+			&info           // 조회 결과를 받는 포인터
+		);
+
+		CString message;
+
+		if (ret == ERROR_SUCCESS)
+		{
+			const bool registered =
+				(info->flags & FWPM_CALLOUT_FLAG_REGISTERED) != 0;
+
+			message.Format(
+				L"SNI V%d: ID=%u, 커널 등록=%s",
+				i == 0 ? 4 : 6,
+				info->calloutId,
+				registered ? L"YES" : L"NO"
+			);
+
+			// 조회 함수가 할당한 메모리를 해제
+			FwpmFreeMemory0(reinterpret_cast<void**>(&info));
+		}
+		else
+		{
+			message.Format(
+				L"SNI V%d: 조회 실패 0x%08X",
+				i == 0 ? 4 : 6,
+				ret
+			);
+		}
+
+		AfxMessageBox(message);
+	}
 	return;
 }
 

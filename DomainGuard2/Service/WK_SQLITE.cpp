@@ -34,44 +34,49 @@ void WK_SQLITE::run()
 		{
 			CSingleLock lock(&this->cs, FALSE);
 			lock.Lock();
-			auto data = q.front();
-			q.pop_front();
+			while (!this->q.empty())
+			{
+				auto data = q.front();
+				q.pop_front();
+
+				data.domain = this->paser(data.domain);
+
+				if (data.type == sqlType::select)
+				{
+
+				}
+				else if (data.type == sqlType::insert)
+				{
+					this->db_Insert(data.domain, data.block);
+				}
+				else if (data.type == sqlType::update)
+				{
+					this->db_Update(data.domain, data.block);
+				}
+				else if (data.type == sqlType::remove)
+				{
+					this->db_Delete(data.domain);
+				}
+				else if (data.type == sqlType::select_Init)
+				{
+					this->select_Init();
+				}
+				else if (data.type == sqlType::wfpInsert)
+				{
+					this->wfp_DB_Insert(data.wfpInfo);
+				}
+				else if (data.type == sqlType::wfpDelete)
+				{
+					this->wfp_DB_Delete(data.wfpInfo);
+				}
+				else if (data.type == sqlType::wfpSelect_Init)
+				{
+					this->wfp_DB_Select_Init();
+				}
+
+			}
+
 			lock.Unlock();
-
-			data.domain = this->paser(data.domain);
-
-			if (data.type == sqlType::select)
-			{
-
-			}
-			else if (data.type == sqlType::insert)
-			{
-				this->db_Insert(data.domain, data.block);
-			}
-			else if (data.type == sqlType::update)
-			{
-				this->db_Update(data.domain, data.block);
-			}
-			else if (data.type == sqlType::remove)
-			{
-				this->db_Delete(data.domain);
-			}
-			else if (data.type == sqlType::select_Init)
-			{
-				this->select_Init();
-			}
-			else if (data.type == sqlType::wfpInsert)
-			{
-				this->wfp_DB_Insert(data.wfpInfo);
-			}
-			else if (data.type == sqlType::wfpDelete)
-			{
-				this->wfp_DB_Delete(data.wfpInfo);
-			}
-			else if (data.type == sqlType::wfpSelect_Init)
-			{
-				this->wfp_DB_Select_Init();
-			}
 			//data.
 		}
 	}
@@ -144,7 +149,7 @@ int WK_SQLITE::wfp_selectCallBack(void* vp, int columnCnt,
 	CString ss2_port;
 	ss2_port.Format(_T("%S"), s2_port.c_str());
 	info.port = ss2_port;
-	
+
 	p_this->wfp_SelectRet.push_back(info);
 	return 0;
 }

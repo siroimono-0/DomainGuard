@@ -16,6 +16,15 @@ public:
 	~WFP();
 
 	void init();
+	void registerSniFilter();
+
+	DWORD addSniCallout(const GUID GUID_Callout,
+		const GUID GUID_Layer_Stream,
+		UINT32* sniCalloutId);
+
+	DWORD addSniStreamFilter(const GUID GUID_Callout,
+		const GUID GUID_Layer_Stream,
+		UINT64* sniStreamFilterId);
 
 	void addFile(wfpFileInfo& info);
 	DWORD addBlockFilter(const GUID& layer, FWP_BYTE_BLOB* appID,
@@ -27,8 +36,13 @@ public:
 
 private:
 	WCHAR init_Path[MAX_PATH]{};
+	UINT32 sniCalloutId_V4 = 0;
+	UINT32 sniCalloutId_V6 = 0;
+	UINT64 sniStreamFilterId_V4 = 0;
+	UINT64 sniStreamFilterId_V6 = 0;
 
 	HANDLE h_engine = nullptr;
 	WFPModel* p_WFPModel = nullptr;
+
 };
 

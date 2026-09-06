@@ -10,6 +10,8 @@ class DNS;
 class DNSLogItemModel;
 class WFP;
 class WFPModel;
+class CalloutDriverClient;
+class DriverLogModel;
 
 class AppContext
 {
@@ -32,5 +34,7 @@ private:
 	DNSLogItemModel* p_DNSLogItemModel = nullptr;
 	WFP* p_WFP = nullptr;
 	WFPModel* p_WFPModel = nullptr;
+	CalloutDriverClient* p_CalloutDriver = nullptr;
+	DriverLogModel* p_DriverLogModel = nullptr;
 };
 

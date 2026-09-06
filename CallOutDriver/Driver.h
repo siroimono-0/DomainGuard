@@ -1,7 +1,29 @@
 #pragma once
 
-#include <ntddk.h>
+// 반드시 ndis.h보다 먼저 정의
+#ifndef NDIS_SUPPORT_NDIS6
+#define NDIS_SUPPORT_NDIS6 1
+#endif
 
+#ifndef NDIS630
+#define NDIS630 1
+#endif
+
+#include <ntddk.h>
+#include <ndis.h>
+#include <fwpsk.h>
+#include <fwpmk.h>
+#include "../SharedIoctl/SharedIoctl.h"
+
+// ================================================
+extern Q_Domain g_Q_Domain;
+extern UINT32 g_calloutId_V4;
+extern UINT32 g_calloutId_V6;
+//extern UINT32 g_SniCalloutIdV4;
+//extern UINT32 g_SniCalloutIdV6;
+// ================================================
+
+void KDPRINT_DOMAIN();
 // C++ 컴파일 시 DriverEntry 이름이 변형되지 않게 함
 extern "C"
 NTSTATUS DriverEntry(
@@ -43,6 +65,25 @@ static NTSTATUS CompleteIrp(
 NTSTATUS DispatchUnsupported(
 	PDEVICE_OBJECT deviceObject, PIRP irp
 );
+
+NTSTATUS RegisterSniCallout(PDEVICE_OBJECT deviceObject);
+
+NTSTATUS NTAPI SniNotifyFn(FWPS_CALLOUT_NOTIFY_TYPE notifyType,
+	const GUID* filterKey, FWPS_FILTER0* filter);
+
+void NTAPI SniClassifyFn(const FWPS_INCOMING_VALUES0* inFixedValues,
+	const FWPS_INCOMING_METADATA_VALUES0* inMetaValues,
+	void* layerData,
+	//const void* classiftyContext,
+	const FWPS_FILTER0* filter,
+	UINT64 flowContext,
+	FWPS_CLASSIFY_OUT0* classifyOut);
+
+
+void addDomain(PIRP p_irp, PIO_STACK_LOCATION p_stack);
+void removeDomain(PIRP p_irp, PIO_STACK_LOCATION p_stack);
+
+void init_Q_Domain();
 
 
 

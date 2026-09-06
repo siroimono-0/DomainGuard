@@ -19,6 +19,7 @@
 using namespace std;
 
 #define TIMER_3SEC 1
+#define DOMAIN_MAX_LENGTH 253
 
 constexpr UINT WM_QFINISHED_FROM_WK_SQLITE = WM_APP + 1;
 constexpr UINT WM_CLICKED_FROM_CBLOCKLISTCTRL = WM_APP + 2;
@@ -103,7 +104,12 @@ typedef struct blockDomain
 {
 	CString domain;
 	bool block;
+	//std::string domain_driver;
+	//char  domain_Driver[DOMAIN_MAX_LENGTH];
+	//int domain_Driver_Len = 0;
 }blockDomain;
+
+
 
 typedef std::vector<blockDomain> vecBlockDomain;
 
@@ -166,13 +172,30 @@ typedef struct DNSLogItem
 	int responeseTime;
 };
 
+enum class DriverLogResult
+{
+	Allowed,
+	Blocked,
+	Timeout,
+	Error
+};
+
+typedef struct DriverLogItem
+{
+	SYSTEMTIME requestTime{};
+	ULONGLONG requestTick;
+
+	CString domain;
+	CString queryType;
+	DriverLogResult result;
+	int responeseTime;
+};
+
 typedef std::vector<DNSLogItem> vecDNSLogItem;
 typedef std::unordered_map<uint16_t, DNSLogItem> un_map_DNSLogItem;
+typedef std::vector<DriverLogItem> vecDriverLogItem;
 
-// {B00AA7A5-264D-4093-936D-0334A7CC90A1}
-static const GUID GUID_WFP =
-{ 0xb00aa7a5, 0x264d, 0x4093, 
-	{ 0x93, 0x6d, 0x3, 0x34, 0xa7, 0xcc, 0x90, 0xa1 } };
+
 
 
 

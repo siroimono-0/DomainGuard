@@ -308,6 +308,10 @@ CRect CBlockListCtrl::get_DeleteRect(int row)
 
 void CBlockListCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 {
+	if (::GetCapture() == GetSafeHwnd())
+	{
+		::ReleaseCapture();
+	}
 
 	LVHITTESTINFO hitInfo{};
 	hitInfo.pt = point;
@@ -324,7 +328,6 @@ void CBlockListCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 	if (column == 2)
 	{
 		this->SetItemText(row, 2, _T("1"));
-		this->SetCapture();
 		RedrawItems(row, row);
 
 		CString domain = this->GetItemText(row, 0);

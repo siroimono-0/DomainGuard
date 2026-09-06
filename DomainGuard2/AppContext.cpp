@@ -10,6 +10,8 @@
 #include "./Model/DNSLogItemModel.h"
 #include "./Service/WFP/WFP.h"
 #include "./Model/WFPModel.h"
+#include "./Service/CalloutDriverClient/CalloutDriverClient.h"
+#include "./Model/DriverLogModel.h"
 
 AppContext::AppContext(CDomainGuard2Doc* p_Doc, CDomainGuard2View* p_View)
 {
@@ -44,9 +46,13 @@ void AppContext::assembly()
 	this->p_WFPModel = new WFPModel(handle_View);
 	this->p_Doc->set_p_WFPModel(this->p_WFPModel);
 
+	this->p_DriverLogModel = new DriverLogModel();
+	this->p_Doc->set_p_DriverLogModel(this->p_DriverLogModel);
+
 	this->p_ResultQ_SQLITE = new ResultQ_SQLITE();
 	this->p_Controller = new Controller();
 
+	this->p_CalloutDriver = new CalloutDriverClient(this->p_DomainBlockModel);
 	//this->p_SQLITE->set_handle_View(handle_View);
 	this->p_DNS = new DNS(this->p_DomainBlockModel);
 	this->p_WFP = new WFP(this->p_WFPModel);
@@ -55,7 +61,8 @@ void AppContext::assembly()
 	this->p_Controller->set_p_Doc(this->p_Doc);
 	this->p_Controller->set_p_SQLITE(this->p_SQLITE);
 	this->p_Controller->set_p_DNS(this->p_DNS);
-	this->p_Controller->set_p_WFP(this->p_WFP);
+	this->p_Controller->set_p_WFP(this->p_WFP); 
+	this->p_Controller->set_p_CalloutDriver(this->p_CalloutDriver);
 
 	this->p_View->set_p_Controller(this->p_Controller);
 	return;

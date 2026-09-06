@@ -34,6 +34,9 @@
     <Filter Include="Service\CalloutDriverClient">
       <UniqueIdentifier>{14891927-6b21-4acc-93d8-8d113aec14bf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SharedIoctl">
+      <UniqueIdentifier>{1169391f-889f-4366-8cfc-1282e8223f4a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DomainGuard2.h">
@@ -120,6 +123,15 @@
     <ClInclude Include="Service\CalloutDriverClient\CalloutDriverClient.h">
       <Filter>Service\CalloutDriverClient</Filter>
     </ClInclude>
+    <ClInclude Include="..\SharedIoctl\SharedIoctl.h">
+      <Filter>SharedIoctl</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\DriverLogModel.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="CDriverLogCtrl.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DomainGuard2.cpp">
@@ -196,6 +208,12 @@
     </ClCompile>
     <ClCompile Include="Service\CalloutDriverClient\CalloutDriverClient.cpp">
       <Filter>Service\CalloutDriverClient</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\DriverLogModel.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="CDriverLogCtrl.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

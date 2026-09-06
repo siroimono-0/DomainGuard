@@ -7,6 +7,7 @@
 class DomainBlockModel;
 class DNSLogItemModel;
 class WFPModel;
+class DriverLogModel;
 
 class CDomainGuard2Doc : public CDocument
 {
@@ -74,11 +75,17 @@ public:
 
 	void set_SelectInit_To_WFPModel(vecWfpFileInfo vec_Info);
 
+	// =================================================
+	// =================================================
+
+	void set_p_DriverLogModel(DriverLogModel* p_DriverLogModel);
+
 private:
 	HWND handle_View = NULL;
 	DomainBlockModel* p_DomainBlockModel = nullptr;
 	DNSLogItemModel* p_DNSLogItemModel = nullptr;
 	WFPModel* p_WFPModel = nullptr;
+	DriverLogModel* p_DriverLogModel = nullptr;
 
 #ifdef SHARED_HANDLERS
 	// 검색 처리기에 대한 검색 콘텐츠를 설정하는 도우미 함수

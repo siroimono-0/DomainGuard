@@ -4,6 +4,7 @@
 #include "../DomainGuard2Doc.h"
 #include "../Service/DNS/DNS.h"
 #include "../Service/WFP/WFP.h"
+#include "../Service/CalloutDriverClient/CalloutDriverClient.h"
 
 void  Controller::set_p_Doc(CDomainGuard2Doc* p_Doc)
 {
@@ -40,6 +41,7 @@ void Controller::finished_ResultQ()
 	if (data.sql_Type == sqlType::select_Init)
 	{
 		this->p_Doc->set_BlocDomain_To_Model(std::move(data.vec_BlockDomain));
+		this->p_CalloutDriver->init_Post();
 	}
 	else if (data.sql_Type == sqlType::select)
 	{
@@ -47,16 +49,18 @@ void Controller::finished_ResultQ()
 	}
 	else if (data.sql_Type == sqlType::insert)
 	{
-		this->p_Doc->insert_To_Model(std::move(data._blockDomain));
-
+		this->p_Doc->insert_To_Model(data._blockDomain);
+		this->p_CalloutDriver->insert_Domain(data._blockDomain);
 	}
 	else if (data.sql_Type == sqlType::update)
 	{
-		this->p_Doc->update_To_Model(std::move(data._blockDomain));
+		this->p_Doc->update_To_Model(data._blockDomain);
+		this->p_CalloutDriver->update_Domain(data._blockDomain);
 	}
 	else if (data.sql_Type == sqlType::remove)
 	{
-		this->p_Doc->delete_To_Model(std::move(data._blockDomain));
+		this->p_Doc->delete_To_Model(data._blockDomain);
+		this->p_CalloutDriver->remove_Domain(data._blockDomain);
 	}
 	else if (data.sql_Type == sqlType::wfpInsert)
 	{
@@ -161,7 +165,17 @@ void Controller::deleteBlockFilter_To_WFP(const CString filePath)
 	return;
 }
 
+void  Controller::set_p_CalloutDriver(CalloutDriverClient* p_CalloutDriver)
+{
+	this->p_CalloutDriver = p_CalloutDriver;
+	return;
+}
 
+void Controller::test_Driver_Domain()
+{
+	this->p_CalloutDriver->test_Driver_Q_TEXT();
+	return;
+}
 
 
 

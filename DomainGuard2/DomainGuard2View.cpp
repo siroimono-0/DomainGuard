@@ -48,6 +48,7 @@ BEGIN_MESSAGE_MAP(CDomainGuard2View, CFormView)
 		//&CDomainGuard2View::On_SELECT_INIT_FROM_WK_SQLITE)
 	ON_WM_TIMER()
 	ON_COMMAND(ID_WFP_ADD, &CDomainGuard2View::OnWfpAdd)
+	ON_COMMAND(ID_TEST_TEST, &CDomainGuard2View::OnTestTest)
 END_MESSAGE_MAP()
 
 // CDomainGuard2View 생성/소멸
@@ -70,6 +71,7 @@ void CDomainGuard2View::DoDataExchange(CDataExchange* pDX)
 	//  DDX_Control(pDX, IDC_LIST_DOMAIN_LOG, domainLog_List);
 	DDX_Control(pDX, IDC_LIST_DOMAIN_LOG, domainLogListCtrl);
 	DDX_Control(pDX, IDC_LIST_WFP, WFPListCtrl);
+	DDX_Control(pDX, IDC_LIST_DriverLog, driverLogCtrl);
 }
 
 BOOL CDomainGuard2View::PreCreateWindow(CREATESTRUCT& cs)
@@ -259,6 +261,15 @@ void CDomainGuard2View::OnWfpAdd()
 	return;
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
 }
+
+void CDomainGuard2View::OnTestTest()
+{
+	this->p_Controller->test_Driver_Domain();
+	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+}
+
+
+
 
 
 
