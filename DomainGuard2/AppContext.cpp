@@ -71,5 +71,6 @@ void AppContext::assembly()
 void AppContext::start_Timer()
 {
 	this->p_View->SetTimer(TIMER_3SEC, 3000, nullptr);
+	this->p_View->SetTimer(TIMER_3SEC_DRIVERLOG, 3000, nullptr);
 	return;
 }

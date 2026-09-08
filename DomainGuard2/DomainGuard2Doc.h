@@ -2,6 +2,7 @@
 // DomainGuard2Doc.h: CDomainGuard2Doc 클래스의 인터페이스
 //
 
+#include "../SharedIoctl/SharedIoctl.h"
 
 #pragma once
 class DomainBlockModel;
@@ -79,6 +80,7 @@ public:
 	// =================================================
 
 	void set_p_DriverLogModel(DriverLogModel* p_DriverLogModel);
+	void insert_To_DriverLogModel(ARR_DRIVERLOG arr);
 
 private:
 	HWND handle_View = NULL;

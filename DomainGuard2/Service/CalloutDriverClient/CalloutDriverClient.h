@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Windows.h>
+#include "../SharedIoctl/SharedIoctl.h"
 
 class DomainBlockModel;
 
@@ -17,7 +18,8 @@ public:
 	void update_Domain(blockDomain _blockDomain);
 	void remove_Domain(blockDomain _blockDomain);
 
-	void test_Driver_Q_TEXT();
+	void test_Driver_Q_TEXT(); 
+	ARR_DRIVERLOG get_DriverLog();
 
 private:
 	HANDLE h_CalloutDriver = INVALID_HANDLE_VALUE;

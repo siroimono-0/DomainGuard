@@ -5,6 +5,7 @@
 #include "../Service/DNS/DNS.h"
 #include "../Service/WFP/WFP.h"
 #include "../Service/CalloutDriverClient/CalloutDriverClient.h"
+#include "../../SharedIoctl/SharedIoctl.h"
 
 void  Controller::set_p_Doc(CDomainGuard2Doc* p_Doc)
 {
@@ -177,6 +178,11 @@ void Controller::test_Driver_Domain()
 	return;
 }
 
+void Controller::get_DriverLog_To_CalloutDriverClient()
+{
+	ARR_DRIVERLOG arrDriverLog = this->p_CalloutDriver->get_DriverLog();
+	this->p_Doc->insert_To_DriverLogModel(arrDriverLog);
+}
 
 
 

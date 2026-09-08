@@ -19,6 +19,7 @@
 using namespace std;
 
 #define TIMER_3SEC 1
+#define TIMER_3SEC_DRIVERLOG 2
 #define DOMAIN_MAX_LENGTH 253
 
 constexpr UINT WM_QFINISHED_FROM_WK_SQLITE = WM_APP + 1;

@@ -1,4 +1,5 @@
 #include "Driver.h"
+#include "SniPaser.h"
 #pragma comment(lib, "Fwpkclnt.lib")
 
 Q_Domain g_Q_Domain = {};
@@ -207,16 +208,18 @@ void addDomain(PIRP p_irp, PIO_STACK_LOCATION p_stack)
 				sizeof(DOMAIN_REQUEST),
 				Q_Domain_Entry_Tag);
 
-		p_DOMAIN_REQUEST->block = p_Domain_Request->block;
-		p_DOMAIN_REQUEST->len = p_Domain_Request->len;
-		memcpy(p_DOMAIN_REQUEST->domain, p_Domain_Request->domain,
-			p_DOMAIN_REQUEST->len * sizeof(WCHAR));
-
 		if (p_DOMAIN_REQUEST == nullptr)
 		{
 			KdPrint(("DomainGuard: addDomain ___ ExAllocatePool2 ___ ERR\n"));
 			return;
 		}
+
+		p_DOMAIN_REQUEST->block = p_Domain_Request->block;
+		p_DOMAIN_REQUEST->len = p_Domain_Request->len;
+		memcpy(p_DOMAIN_REQUEST->domain, p_Domain_Request->domain,
+			p_DOMAIN_REQUEST->len);
+
+
 		KIRQL oldIrql;
 		KeAcquireSpinLock(&g_Q_Domain.lock, &oldIrql);
 		InsertTailList(&g_Q_Domain.head, &p_DOMAIN_REQUEST->link);
@@ -251,7 +254,7 @@ void removeDomain(PIRP p_irp, PIO_STACK_LOCATION p_stack)
 		bool ret =
 			RtlEqualMemory((const void*)p_Domain_Request->domain,
 				(const void*)tmp_Domain_Request->domain,
-				tmp_Domain_Request->len * sizeof(WCHAR));
+				tmp_Domain_Request->len);
 
 		if (ret == TRUE)
 		{
@@ -315,6 +318,8 @@ void DriverUnload(
 
 void KDPRINT_DOMAIN()
 {
+	KIRQL oldIrql;
+	KeAcquireSpinLock(&g_Q_Domain.lock, &oldIrql);
 	KdPrint(("\nDomainGuard: KDPRINT_DOMAIN\n"));
 
 	PLIST_ENTRY link = g_Q_Domain.head.Flink;
@@ -326,11 +331,12 @@ void KDPRINT_DOMAIN()
 		DOMAIN_REQUEST* tmp_Domain_Request =
 			CONTAINING_RECORD(link, DOMAIN_REQUEST, link);
 
-		KdPrint(("\n\n %ws \n\n", tmp_Domain_Request->domain));
+		KdPrint(("\n\n %s \n\n", tmp_Domain_Request->domain));
 
 		link = next;
 	}
 	KdPrint(("\n------------------------------\n"));
+	KeReleaseSpinLock(&g_Q_Domain.lock, oldIrql);
 
 	return;
 }
@@ -478,11 +484,13 @@ void NTAPI SniClassifyFn(const FWPS_INCOMING_VALUES0* inFixedValues,
 		return;
 	}
 
+	FWPS_STREAM_DATA0* streamData = streamPacket->streamData;
+
 	// 현재 WFP가 전달해준 TCP Stream Data길이
-	SIZE_T streamLenght = streamPacket->streamData->dataLength;
+	SIZE_T streamLength = streamPacket->streamData->dataLength;
 
 	// 현재 Stream Data의 상태를 나타내는 Flag
-	UINT32 streamFlags = streamPacket->streamData->flags;
+	//UINT32 streamFlags = streamPacket->streamData->flags;
 
 	// 어떤 WFP Layer에서 호출댓는지 확인을 위함 - DebugView
 	UINT16 layerId = 0;
@@ -492,6 +500,7 @@ void NTAPI SniClassifyFn(const FWPS_INCOMING_VALUES0* inFixedValues,
 		layerId = inFixedValues->layerId;
 	}
 
+
 	/* DebugView 확인용 로그입니다.
 	* 브라우저에서 HTTPS 사이트에 접속했을 때
 	* 이 메시지가 출력된다면
@@ -500,12 +509,14 @@ void NTAPI SniClassifyFn(const FWPS_INCOMING_VALUES0* inFixedValues,
 	* Callout
 	* ↓
 	* SniClassifyFn()
-	* 연결까지 정상적으로 이루어진 것입니다. */
+	* 연결까지 정상적으로 이루어진 것입니다.
 	KdPrint((
 		"DomainGuard: SniClassifyFn called "
 		"layer=%u, bytes=%lu, flags=0x%08X\n",
 		layerId, static_cast<ULONG>(streamLenght), streamFlags));
+	*/
 
+	// 기본 동작 -> 전체허용
 	// streamPacket->streamData에 요구하는 동작 설정
 	streamPacket->streamAction = FWPS_STREAM_ACTION_NONE;
 
@@ -513,11 +524,136 @@ void NTAPI SniClassifyFn(const FWPS_INCOMING_VALUES0* inFixedValues,
 	streamPacket->countBytesRequired = 0;
 
 	// 이번 호출시 처리한 데이터
-	streamPacket->countBytesEnforced = streamLenght;
+	streamPacket->countBytesEnforced = streamLength;
 
 	// 일단 무조건 허용
 	classifyOut->actionType = FWP_ACTION_PERMIT;
+
+	if (streamData->dataLength == 0)
+	{
+		return;
+	}
+
+	// SEND 방향만 검사
+	// TLS ClientHello는 클라 -> 서버 방향임
+	if ((streamData->flags & FWPS_STREAM_FLAG_SEND) == 0)
+	{
+		return;
+	}
+
+	size_t copyLen = streamData->dataLength;
+
+	if (copyLen > TLS_MAX_RECORD_SIZE)
+	{
+		copyLen = TLS_MAX_RECORD_SIZE;
+	}
+
+	UINT8* buf = (UINT8*)ExAllocatePool2(
+		POOL_FLAG_NON_PAGED,
+		copyLen, 'inSD');
+
+	size_t copyByteLen = 0;
+	if (buf == nullptr)
+	{
+		return;
+	}
+
+	FwpsCopyStreamDataToBuffer0(
+		streamData, buf, copyLen, &copyByteLen);
+
+	char sni[256] = { 0 };
+	size_t reqSize = 0;
+	SNI_RET sniRet = SNI_Paser(buf, copyByteLen, sni, 256, &reqSize);
+
+	ExFreePoolWithTag(buf, 'inSD');
+
+	if (sniRet == SNI_NEED_MORE)
+	{
+		// 일단 넘김
+		return;
+	}
+
+	if (sniRet != SNI_FOUND)
+	{
+		return;
+	}
+
+	bool blocked = isBlockedSni(sni);
+
+	if (blocked == true)
+	{
+		streamPacket->streamAction = FWPS_STREAM_ACTION_DROP_CONNECTION;
+		streamPacket->countBytesRequired = 0;
+		streamPacket->countBytesEnforced = 0;
+
+		classifyOut->actionType = FWP_ACTION_NONE;
+		return;
+	}
+
 }
+
+bool isBlockedSni(char* sni)
+{
+	PLIST_ENTRY link = g_Q_Domain.head.Flink;
+	size_t sniSize = strlen(sni);
+
+	KIRQL oldIrql;
+	KeAcquireSpinLock(&g_Q_Domain.lock, &oldIrql);
+
+	while (link != &g_Q_Domain.head)
+	{
+		PLIST_ENTRY next = link->Flink;
+
+		DOMAIN_REQUEST* tmp_Domain_Request =
+			CONTAINING_RECORD(link, DOMAIN_REQUEST, link);
+
+		if (strcmp(sni, tmp_Domain_Request->domain) == 0 &&
+			tmp_Domain_Request->block == true)
+		{
+			KdPrint(("\n\n BLOCK :: %s \n\n", tmp_Domain_Request->domain));
+			KeReleaseSpinLock(&g_Q_Domain.lock, oldIrql);
+			return true;
+		}
+
+		link = next;
+	}
+	KeReleaseSpinLock(&g_Q_Domain.lock, oldIrql);
+
+	int start = -1;
+	for (int i = 0; i < sniSize; i++)
+	{
+		if (sni[i] == '.')
+		{
+			start = i + 1;
+			//sni += (i + 1);
+			break;
+		}
+	}
+
+	if (start == -1)
+	{
+		return false;
+	}
+
+	return isBlockedSni(sni + start);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -242,6 +242,10 @@ void CDomainGuard2View::OnTimer(UINT_PTR nIDEvent)
 	{
 		this->p_Controller->update_DNSLogItem();
 	}
+	else if (nIDEvent == TIMER_3SEC_DRIVERLOG)
+	{
+		this->p_Controller->get_DriverLog_To_CalloutDriverClient();
+	}
 
 	CFormView::OnTimer(nIDEvent);
 }

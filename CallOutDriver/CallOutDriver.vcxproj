@@ -100,10 +100,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Driver.cpp" />
+    <ClCompile Include="SniPaser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\SharedIoctl\SharedIoctl.h" />
     <ClInclude Include="Driver.h" />
+    <ClInclude Include="Driver_pch.h" />
+    <ClInclude Include="SniPaser.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

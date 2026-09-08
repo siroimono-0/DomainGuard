@@ -43,7 +43,7 @@ void CalloutDriverClient::close()
 		domain_Driver.block = v.block;
 		//std::string tmp = CW2A(v.domain.GetString(), CP_UTF8);
 		memcpy(domain_Driver.domain, v.domain.GetString(),
-			domain_Driver.len * sizeof(WCHAR));
+			domain_Driver.len );
 		domain_Driver.domain[domain_Driver.len] = _T('\0');
 
 		DWORD ret;
@@ -76,9 +76,11 @@ void CalloutDriverClient::init_Post()
 		DOMAIN_REQUEST domain_Driver = { 0 };
 		domain_Driver.len = v.domain.GetLength();
 		domain_Driver.block = v.block;
-		//std::string tmp = CW2A(v.domain.GetString(), CP_UTF8);
-		memcpy(domain_Driver.domain, v.domain.GetString(),
-			domain_Driver.len * sizeof(WCHAR));
+
+		std::string tmp = CW2A(v.domain.GetString(), CP_UTF8);
+		memcpy(domain_Driver.domain, tmp.c_str(),
+			domain_Driver.len);
+
 		domain_Driver.domain[domain_Driver.len] = _T('\0');
 
 		DWORD ret;
@@ -109,8 +111,11 @@ void CalloutDriverClient::insert_Domain(blockDomain _blockDomain)
 	DOMAIN_REQUEST domain_Driver = { 0 };
 	domain_Driver.len = _blockDomain.domain.GetLength();
 	domain_Driver.block = _blockDomain.block;
-	memcpy(domain_Driver.domain, _blockDomain.domain.GetString(),
-		domain_Driver.len * sizeof(WCHAR));
+	std::string tmp = CW2A(_blockDomain.domain.GetString(), CP_UTF8);
+
+	memcpy(domain_Driver.domain, tmp.c_str(),
+		domain_Driver.len);
+
 	domain_Driver.domain[domain_Driver.len] = _T('\0');
 
 	DWORD ret;
@@ -135,9 +140,13 @@ void CalloutDriverClient::update_Domain(blockDomain _blockDomain)
 	DOMAIN_REQUEST domain_Driver = { 0 };
 	domain_Driver.len = _blockDomain.domain.GetLength();
 	domain_Driver.block = _blockDomain.block;
-	memcpy(domain_Driver.domain, _blockDomain.domain.GetString(),
-		domain_Driver.len * sizeof(WCHAR));
+	std::string tmp = CW2A(_blockDomain.domain.GetString(), CP_UTF8);
+
+	memcpy(domain_Driver.domain, tmp.c_str(),
+		domain_Driver.len);
+
 	domain_Driver.domain[domain_Driver.len] = _T('\0');
+
 
 	DWORD ret;
 
@@ -176,9 +185,13 @@ void CalloutDriverClient::remove_Domain(blockDomain _blockDomain)
 	DOMAIN_REQUEST domain_Driver = { 0 };
 	domain_Driver.len = _blockDomain.domain.GetLength();
 	domain_Driver.block = _blockDomain.block;
-	memcpy(domain_Driver.domain, _blockDomain.domain.GetString(),
-		domain_Driver.len * sizeof(WCHAR));
+	std::string tmp = CW2A(_blockDomain.domain.GetString(), CP_UTF8);
+
+	memcpy(domain_Driver.domain, tmp.c_str(),
+		domain_Driver.len);
+
 	domain_Driver.domain[domain_Driver.len] = _T('\0');
+
 
 	DWORD ret;
 
@@ -211,6 +224,27 @@ void CalloutDriverClient::test_Driver_Q_TEXT()
 		TRACE(_T("test_Driver_Q_TEXT ___ ERR %d"), ::GetLastError());
 	}
 	return;
+}
+
+ARR_DRIVERLOG CalloutDriverClient::get_DriverLog()
+{
+	DWORD ret = 0;
+
+	ARR_DRIVERLOG arr = { 0 };
+
+	bool ret2 =
+		::DeviceIoControl(
+			this->h_CalloutDriver, IOCTL_GET_ARR_DRIVERLOG,
+			nullptr, 0,
+			(LPVOID)&arr, sizeof(ARR_DRIVERLOG),
+			&ret, nullptr);
+
+	if (ret2 == false)
+	{
+		TRACE(_T("get_DriverLog ___ false ___ ERR %d"), ::GetLastError());
+	}
+
+	return arr;
 }
 
 /*

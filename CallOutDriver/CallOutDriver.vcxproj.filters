@@ -30,6 +30,9 @@
     <ClCompile Include="Driver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SniPaser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Driver.h">
@@ -37,6 +40,12 @@
     </ClInclude>
     <ClInclude Include="..\SharedIoctl\SharedIoctl.h">
       <Filter>SharedIoctl</Filter>
+    </ClInclude>
+    <ClInclude Include="SniPaser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Driver_pch.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

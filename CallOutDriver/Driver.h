@@ -85,6 +85,8 @@ void removeDomain(PIRP p_irp, PIO_STACK_LOCATION p_stack);
 
 void init_Q_Domain();
 
+bool isBlockedSni(char* sni);
+
 
 
 

@@ -38,6 +38,7 @@ public:
 	// ==================== Driver ==================== 
 	// ==================== Driver ==================== 
 	void test_Driver_Domain();
+	void get_DriverLog_To_CalloutDriverClient();
 	// ==================== Driver ==================== 
 	// ==================== Driver ==================== 
 

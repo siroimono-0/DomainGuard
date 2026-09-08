@@ -239,12 +239,16 @@ void CDomainGuard2Doc::set_SelectInit_To_WFPModel(vecWfpFileInfo vec_Info)
 	this->UpdateAllViews(nullptr, HINT_SELECTINIT_WFPMODEL);
 }
 
-void  CDomainGuard2Doc::set_p_DriverLogModel(DriverLogModel* p_DriverLogModel)
+void CDomainGuard2Doc::set_p_DriverLogModel(DriverLogModel* p_DriverLogModel)
 {
 	this->p_DriverLogModel = p_DriverLogModel;
 	return;
 }
 
+void CDomainGuard2Doc::insert_To_DriverLogModel(ARR_DRIVERLOG arr)
+{
+
+}
 
 
 
