@@ -184,6 +184,10 @@ void Controller::get_DriverLog_To_CalloutDriverClient()
 	this->p_Doc->insert_To_DriverLogModel(arrDriverLog);
 }
 
+ vecDriverLogItem Controller::get_vecDriverLog_To_Doc()
+{
+	return this->p_Doc->get_vecDriverLog_To_DriverLogModel();
+}
 
 
 

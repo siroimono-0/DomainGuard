@@ -6,7 +6,7 @@ class CDriverLogCtrl : public CListCtrl
 public:
     CDriverLogCtrl();
     ~CDriverLogCtrl();
-    void AddBlockItem(const DriverLogItem item, const bool block);
+    void AddBlockItem(const DriverLogItem item);
     void DeleteBlockItem(const CString& domain);
 
     void set_h_View(HWND set);

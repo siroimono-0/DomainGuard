@@ -36,9 +36,11 @@ SNI_RET SNI_Paser(
 	const UINT8* data, size_t dataLen,
 	char* sni, size_t sniLen, size_t* reqSize)
 {
+	KdPrint(("SNI_Paser 222\n"));
 	// TLS Header Size는 5바이트
 	if (dataLen < 5)
 	{
+		KdPrint(("if (dataLen < 5)\n"));
 		return SNI_NEED_MORE;
 	}
 
@@ -65,6 +67,7 @@ SNI_RET SNI_Paser(
 	// 추가 요청 데이터 사이즈 입력 
 	if (recordEnd > dataLen)
 	{
+		KdPrint(("if (recordEnd > dataLen)\n"));
 		*reqSize = recordEnd;
 		return SNI_NEED_MORE;
 	}

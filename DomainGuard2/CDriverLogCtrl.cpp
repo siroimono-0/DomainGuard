@@ -16,8 +16,9 @@ BEGIN_MESSAGE_MAP(CDriverLogCtrl, CListCtrl)
 	ON_WM_LBUTTONUP()
 END_MESSAGE_MAP()
 
-void CDriverLogCtrl::AddBlockItem(const DriverLogItem item, const bool block)
+void CDriverLogCtrl::AddBlockItem(const DriverLogItem item)
 {
+	/*
 		int year = item.requestTime.wYear;
 		int month = item.requestTime.wMonth;
 		int day = item.requestTime.wDay;
@@ -28,28 +29,28 @@ void CDriverLogCtrl::AddBlockItem(const DriverLogItem item, const bool block)
 		CString s_RequestTime;
 		s_RequestTime.Format(_T("%04d-%02d-%02d %02d:%02d:%02d"),
 			year, month, day, hour, minute, second);
+*/
+	int row = this->GetItemCount();
 
-		int row = this->GetItemCount();
+	this->InsertItem(row, item.s_BlockTime);
 
-		this->InsertItem(row, s_RequestTime);
+	//int responeseTime = item.responeseTime;
+	//CString s_ResponeseTime;
+	//s_ResponeseTime.Format(_T("%d ms"), responeseTime);
+	this->SetItemText(row, 1, item.domain);
 
-		int responeseTime = item.responeseTime;
-		CString s_ResponeseTime;
-		s_ResponeseTime.Format(_T("%d ms"), responeseTime);
-		this->SetItemText(row, 1, s_ResponeseTime);
+	//this->SetItemText(row, 2, item.domain);
 
-		this->SetItemText(row, 2, item.domain);
+	//this->SetItemText(row, 3, item.queryType);
 
-		this->SetItemText(row, 3, item.queryType);
-
-		if (item.result == DriverLogResult::Allowed)
-		{
-			this->SetItemText(row, 4, _T("Allowed"));
-		}
-		else if (item.result == DriverLogResult::Blocked)
-		{
-			this->SetItemText(row, 4, _T("Blocked"));
-		}
+	if (item.result == DriverLogResult::Allowed)
+	{
+		this->SetItemText(row, 2, _T("Allowed"));
+	}
+	else if (item.result == DriverLogResult::Blocked)
+	{
+		this->SetItemText(row, 2, _T("Blocked"));
+	}
 	return;
 }
 
@@ -78,28 +79,19 @@ void CDriverLogCtrl::PreSubclassWindow()
 
 	this->InsertColumn(
 		0,
-		_T("RequestTime"),
+		_T("BlockTime"),
 		LVCFMT_CENTER, 150);
 
 	this->InsertColumn(
 		1,
-		_T("ResponeseTime"),
-		LVCFMT_CENTER, 100);
-
-	this->InsertColumn(
-		2,
-		_T("Domain"),
+		_T("Server Name Indication"),
 		LVCFMT_CENTER, 200);
 
 	this->InsertColumn(
-		3,
-		_T("QueryType"),
-		LVCFMT_CENTER, 100);
-
-	this->InsertColumn(
-		4,
+		2,
 		_T("Result"),
-		LVCFMT_CENTER, 100);
+		LVCFMT_CENTER, 200);
+
 
 	//RedrawWindow();
 	return;

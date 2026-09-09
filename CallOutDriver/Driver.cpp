@@ -3,6 +3,7 @@
 #pragma comment(lib, "Fwpkclnt.lib")
 
 Q_Domain g_Q_Domain = {};
+Q_DriverLog g_Q_DriverLog = {};
 UINT32 g_calloutId_V4 = 0;
 UINT32 g_calloutId_V6 = 0;
 
@@ -10,6 +11,12 @@ void init_Q_Domain()
 {
 	InitializeListHead(&g_Q_Domain.head);
 	KeInitializeSpinLock(&g_Q_Domain.lock);
+}
+
+void init_Q_Driver()
+{
+	InitializeListHead(&g_Q_DriverLog.head);
+	KeInitializeSpinLock(&g_Q_DriverLog.lock);
 }
 
 extern "C"
@@ -21,6 +28,7 @@ NTSTATUS DriverEntry(
 	UNREFERENCED_PARAMETER(registryPath);
 
 	init_Q_Domain();
+	init_Q_Driver();
 
 	// 미정의된 번호들 미정의 함수 등록
 	for (ULONG i = 0; i <= IRP_MJ_MAXIMUM_FUNCTION; i++)
@@ -185,6 +193,12 @@ NTSTATUS DispatchDeviceControl(
 	{
 		KdPrint(("DomainGuard: DispatchDeviceControl -  IOCTL_KDPRINT_DOMAIN called\n"));
 		KDPRINT_DOMAIN();
+		status = STATUS_SUCCESS;
+	}
+	else if (ioctlCode == IOCTL_GET_ARR_DRIVERLOG)
+	{
+		KdPrint(("DomainGuard: DispatchDeviceControl - IOCTL_GET_ARR_DRIVERLOG called\n"));
+		get_ArrDriverLog(irp);
 		status = STATUS_SUCCESS;
 	}
 	else
@@ -497,6 +511,7 @@ void NTAPI SniClassifyFn(const FWPS_INCOMING_VALUES0* inFixedValues,
 
 	if (inFixedValues != nullptr)
 	{
+		//KdPrint(("	if (inFixedValues != nullptr)\n"));
 		layerId = inFixedValues->layerId;
 	}
 
@@ -531,6 +546,7 @@ void NTAPI SniClassifyFn(const FWPS_INCOMING_VALUES0* inFixedValues,
 
 	if (streamData->dataLength == 0)
 	{
+		//KdPrint(("if (streamData->dataLength == 0)\n"));
 		return;
 	}
 
@@ -538,6 +554,7 @@ void NTAPI SniClassifyFn(const FWPS_INCOMING_VALUES0* inFixedValues,
 	// TLS ClientHello는 클라 -> 서버 방향임
 	if ((streamData->flags & FWPS_STREAM_FLAG_SEND) == 0)
 	{
+		//KdPrint(("if ((streamData->flags & FWPS_STREAM_FLAG_SEND) == 0)\n"));
 		return;
 	}
 
@@ -555,6 +572,7 @@ void NTAPI SniClassifyFn(const FWPS_INCOMING_VALUES0* inFixedValues,
 	size_t copyByteLen = 0;
 	if (buf == nullptr)
 	{
+		//KdPrint(("if (buf == nullptr)\n"));
 		return;
 	}
 
@@ -569,12 +587,14 @@ void NTAPI SniClassifyFn(const FWPS_INCOMING_VALUES0* inFixedValues,
 
 	if (sniRet == SNI_NEED_MORE)
 	{
+		KdPrint(("if (sniRet == SNI_NEED_MORE)\n"));
 		// 일단 넘김
 		return;
 	}
 
 	if (sniRet != SNI_FOUND)
 	{
+		KdPrint(("if (sniRet != SNI_FOUND)\n"));
 		return;
 	}
 
@@ -582,12 +602,19 @@ void NTAPI SniClassifyFn(const FWPS_INCOMING_VALUES0* inFixedValues,
 
 	if (blocked == true)
 	{
+		KdPrint(("BlockedSni\n"));
 		streamPacket->streamAction = FWPS_STREAM_ACTION_DROP_CONNECTION;
 		streamPacket->countBytesRequired = 0;
 		streamPacket->countBytesEnforced = 0;
 
 		classifyOut->actionType = FWP_ACTION_NONE;
+
+		addDriverLog(sni);
 		return;
+	}
+	else
+	{
+		KdPrint(("Not ___ BlockedSni\n"));
 	}
 
 }
@@ -637,6 +664,85 @@ bool isBlockedSni(char* sni)
 
 	return isBlockedSni(sni + start);
 }
+
+void addDriverLog(const char* sni)
+{
+	//UNREFERENCED_PARAMETER(p_stack);
+	KdPrint(("DomainGuard: addDriverLog\n"));
+
+	DRIVERLOG* p_DRIVERLOG =
+		(DRIVERLOG*)ExAllocatePool2(POOL_FLAG_NON_PAGED,
+			sizeof(DRIVERLOG),
+			Q_DriverLog_Entry_Tag);
+
+	if (p_DRIVERLOG == nullptr)
+	{
+		KdPrint(("DomainGuard: addDriverLog ___ ExAllocatePool2 ___ ERR\n"));
+		return;
+	}
+
+	strcpy(p_DRIVERLOG->domain, sni);
+	LARGE_INTEGER now;
+	KeQuerySystemTime(&now);
+	p_DRIVERLOG->time = now.QuadPart;
+
+	KIRQL oldIrql;
+	KeAcquireSpinLock(&g_Q_DriverLog.lock, &oldIrql);
+	InsertTailList(&g_Q_DriverLog.head, &p_DRIVERLOG->link);
+	KeReleaseSpinLock(&g_Q_DriverLog.lock, oldIrql);
+	return;
+}
+
+void get_ArrDriverLog(PIRP p_irp)
+{
+	KdPrint(("DomainGuard: get_ArrDriverLog\n"));
+	ARR_DRIVERLOG* p_ArrDriverLog =
+		(ARR_DRIVERLOG*)p_irp->AssociatedIrp.SystemBuffer;
+
+	KIRQL oldIrql;
+	KeAcquireSpinLock(&g_Q_DriverLog.lock, &oldIrql);
+	PLIST_ENTRY link = g_Q_DriverLog.head.Flink;
+
+	//ARR_DRIVERLOG arrDriverLog = { 0 };
+	DRIVERLOG* remove_Entry = nullptr;
+	int i = 0;
+
+	while (link != &g_Q_DriverLog.head)
+	{
+		PLIST_ENTRY next = link->Flink;
+		DRIVERLOG* tmp_DriverLog =
+			CONTAINING_RECORD(link, DRIVERLOG, link);
+
+		RemoveEntryList(link);
+		remove_Entry = tmp_DriverLog;
+
+		strcpy(p_ArrDriverLog->arrDriverLog[i].domain, tmp_DriverLog->domain);
+		p_ArrDriverLog->arrDriverLog[i].time = tmp_DriverLog->time;
+
+		if (remove_Entry != nullptr)
+		{
+			ExFreePoolWithTag(remove_Entry, Q_Domain_Entry_Tag);
+		}
+
+		i++;
+		if (i >= 32)
+		{
+			break;
+		}
+		link = next;
+	}
+	KeReleaseSpinLock(&g_Q_Domain.lock, oldIrql);
+
+	return;
+}
+/*
+typedef struct DRIVERLOG
+{
+	char domain[DOMAIN_MAX_CHARS];
+	LONGLONG time;
+	// KeQuerySystemTime(LARGE_INTEGER)
+	// LARGE_INTEGER.QuadPart
+}DRIVERLOG;*/
 
 
 

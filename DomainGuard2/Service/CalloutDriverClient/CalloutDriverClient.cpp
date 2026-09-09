@@ -231,6 +231,15 @@ ARR_DRIVERLOG CalloutDriverClient::get_DriverLog()
 	DWORD ret = 0;
 
 	ARR_DRIVERLOG arr = { 0 };
+	/*
+	strcpy_s(arr.arrDriverLog[0].domain, "hello11111");
+	arr.arrDriverLog[0].time = 0;
+
+	strcpy_s(arr.arrDriverLog[1].domain, "hello22222");
+	arr.arrDriverLog[1].time = 1;
+
+	strcpy_s(arr.arrDriverLog[2].domain, "hello33333");
+	arr.arrDriverLog[2].time = 2;*/
 
 	bool ret2 =
 		::DeviceIoControl(

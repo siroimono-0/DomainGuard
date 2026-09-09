@@ -15,6 +15,7 @@
 #include "./Model/DomainBlockModel.h"
 #include "./Model/DNSLogItemModel.h"
 #include "./Model/WFPModel.h"
+#include "./Model/DriverLogModel.h"
 
 
 #ifdef _DEBUG
@@ -247,9 +248,14 @@ void CDomainGuard2Doc::set_p_DriverLogModel(DriverLogModel* p_DriverLogModel)
 
 void CDomainGuard2Doc::insert_To_DriverLogModel(ARR_DRIVERLOG arr)
 {
-
+	this->p_DriverLogModel->add_DriverLogItem(arr);
+	this->UpdateAllViews(nullptr, HINT_ADD_DRIVERLOGMODEL);
 }
 
+vecDriverLogItem CDomainGuard2Doc::get_vecDriverLog_To_DriverLogModel()
+{
+	return this->p_DriverLogModel->get_tmp_vec_DriverLogItem();
+}
 
 
 

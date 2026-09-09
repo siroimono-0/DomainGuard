@@ -39,6 +39,7 @@ public:
 	// ==================== Driver ==================== 
 	void test_Driver_Domain();
 	void get_DriverLog_To_CalloutDriverClient();
+	vecDriverLogItem get_vecDriverLog_To_Doc();
 	// ==================== Driver ==================== 
 	// ==================== Driver ==================== 
 

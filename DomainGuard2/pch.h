@@ -37,6 +37,8 @@ constexpr LPARAM HINT_UPDATE_DNSLOGITEMMODEL = WM_APP + 100;
 constexpr LPARAM HINT_INSERT_WFPMODEL = WM_APP + 200;
 constexpr LPARAM HINT_SELECTINIT_WFPMODEL = WM_APP + 201;
 
+constexpr LPARAM HINT_ADD_DRIVERLOGMODEL = WM_APP + 300;
+
 constexpr UINT DNS_BUFFER_SIZE = 65536;
 
 enum class DirectionType
@@ -183,13 +185,10 @@ enum class DriverLogResult
 
 typedef struct DriverLogItem
 {
-	SYSTEMTIME requestTime{};
-	ULONGLONG requestTick;
-
+	SYSTEMTIME BlockTime{};
+	CString s_BlockTime;
 	CString domain;
-	CString queryType;
 	DriverLogResult result;
-	int responeseTime;
 };
 
 typedef std::vector<DNSLogItem> vecDNSLogItem;

@@ -45,6 +45,7 @@
 #define DOMAIN_MAX_CHARS 256
 
 constexpr ULONG Q_Domain_Entry_Tag = 'xxxx';
+constexpr ULONG Q_DriverLog_Entry_Tag = 'yyyy';
 
 typedef struct DOMAIN_REQUEST
 {
@@ -56,16 +57,27 @@ typedef struct DOMAIN_REQUEST
 
 typedef struct DRIVERLOG
 {
+	LIST_ENTRY link;
 	char domain[DOMAIN_MAX_CHARS];
 	LONGLONG time;
-    // KeQuerySystemTime(LARGE_INTEGER)
-    // LARGE_INTEGER.QuadPart
+	// KeQuerySystemTime(LARGE_INTEGER)
+	// LARGE_INTEGER.QuadPart
 }DRIVERLOG;
 
 typedef struct ARR_DRIVERLOG
 {
 	DRIVERLOG arrDriverLog[32];
 }ARR_DRIVERLOG;
+
+typedef struct Q_DriverLog {
+	LIST_ENTRY head;
+	KSPIN_LOCK lock;
+}Q_DriverLog, * PQ_DriverLog ;
+
+typedef struct Q_DriverLog_Entry {
+	LIST_ENTRY link;
+	DRIVERLOG driverLog_req;
+}Q_DriverLog_Entry, * PQ_DriverLog_Entry;
 
 typedef struct Q_Domain {
 	LIST_ENTRY head;

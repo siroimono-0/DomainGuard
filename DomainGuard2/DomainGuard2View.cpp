@@ -199,6 +199,14 @@ void CDomainGuard2View::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 			this->WFPListCtrl.AddBlockItem(v);
 		}
 	}
+	else if (lHint == HINT_ADD_DRIVERLOGMODEL)
+	{
+		vecDriverLogItem vec = this->p_Controller->get_vecDriverLog_To_Doc();
+		for (auto& v : vec)
+		{
+			this->driverLogCtrl.AddBlockItem(v);
+		}
+	}
 
 	//this->WFPListCtrl.AddBlockItem(_T("123"), true);
 	return;

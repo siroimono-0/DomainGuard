@@ -21,6 +21,7 @@ extern UINT32 g_calloutId_V4;
 extern UINT32 g_calloutId_V6;
 //extern UINT32 g_SniCalloutIdV4;
 //extern UINT32 g_SniCalloutIdV6;
+extern Q_DriverLog g_Q_DriverLog;
 // ================================================
 
 void KDPRINT_DOMAIN();
@@ -86,6 +87,10 @@ void removeDomain(PIRP p_irp, PIO_STACK_LOCATION p_stack);
 void init_Q_Domain();
 
 bool isBlockedSni(char* sni);
+
+void addDriverLog(const char* sni);
+void init_Q_Driver(); 
+void get_ArrDriverLog(PIRP p_irp);
 
 
 

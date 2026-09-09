@@ -81,6 +81,7 @@ public:
 
 	void set_p_DriverLogModel(DriverLogModel* p_DriverLogModel);
 	void insert_To_DriverLogModel(ARR_DRIVERLOG arr);
+	vecDriverLogItem get_vecDriverLog_To_DriverLogModel();
 
 private:
 	HWND handle_View = NULL;
