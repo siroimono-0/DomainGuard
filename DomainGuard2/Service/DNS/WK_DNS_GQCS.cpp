@@ -8,8 +8,10 @@
 #pragma comment(lib, "Ws2_32.lib")
 
 WK_DNS_GQCS::WK_DNS_GQCS(SOCKET& soc, SOCKET& wsaSoc,
-	HANDLE h_Iocp, ProxyID_Store* p_ProxyID_Store)
+	HANDLE h_Iocp, ProxyID_Store* p_ProxyID_Store,
+	HWND h_View)
 {
+	this->h_View = h_View;
 	this->soc = soc;
 	this->wsaSoc = wsaSoc;
 	this->h_Iocp = h_Iocp;
@@ -29,6 +31,9 @@ UINT AFX_CDECL WK_DNS_GQCS::th_Func(LPVOID vp)
 {
 	WK_DNS_GQCS* p_this = (WK_DNS_GQCS*)vp;
 	p_this->run();
+	TRACE(_T("\nClose WK_DNS_GQCS Thread\n"));
+
+	::PostMessage(p_this->h_View, WM_DELETE_WK_GQCS_DNS_FROM_WK_GQCS_DNS, NULL, NULL);
 	return 0;
 }
 
@@ -41,6 +46,11 @@ void WK_DNS_GQCS::run()
 		OVERLAPPED* p_ov = nullptr;
 		bool ret = GetQueuedCompletionStatus(this->h_Iocp, &recvLen,
 			&key, &p_ov, INFINITE);
+
+		if (ret && key == 0 && p_ov == nullptr)
+		{
+			break;
+		}
 
 		if (ret == false)
 		{

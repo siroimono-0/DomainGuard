@@ -52,7 +52,7 @@ void CDomainLogListCtrl::PreSubclassWindow()
 	this->InsertColumn(
 		1,
 		_T("ResponeseTime"),
-		LVCFMT_CENTER, 100);
+		LVCFMT_CENTER, 150);
 
 	this->InsertColumn(
 		2,
@@ -69,6 +69,21 @@ void CDomainLogListCtrl::PreSubclassWindow()
 		_T("Result"),
 		LVCFMT_CENTER, 100);
 
+	CRect client;
+	GetClientRect(&client);
+
+	int columnsWidth = 0;
+	for (int i = 0; i < 4; i++)
+	{
+		if (i == 2)
+		{
+			continue;
+		}
+		columnsWidth += GetColumnWidth(i);
+	}
+
+	int domainWidth = client.Width() - columnsWidth;
+	SetColumnWidth(2, domainWidth);
 	//RedrawWindow();
 	return;
 }

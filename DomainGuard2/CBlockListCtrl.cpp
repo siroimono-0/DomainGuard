@@ -38,13 +38,18 @@ void CBlockListCtrl::PreSubclassWindow()
 	this->InsertColumn(
 		1,
 		_T("Block"),
-		LVCFMT_CENTER, 50);
+		LVCFMT_CENTER, 100);
 	this->InsertColumn(
 		2,
 		_T("Delete"),
-		LVCFMT_CENTER, 50);
+		LVCFMT_CENTER, 100);
 
+	CRect client;
+	GetClientRect(&client);
 	//RedrawWindow();
+
+	int domainWidth = client.Width() - GetColumnWidth(1) - GetColumnWidth(2);
+	this->SetColumnWidth(0, domainWidth);
 	return;
 }
 

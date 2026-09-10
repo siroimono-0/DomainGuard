@@ -8,11 +8,14 @@ class ProxyID_Store;
 class DNS
 {
 public:
-	DNS(DomainBlockModel* p_DomainBlockModel);
+	DNS(DomainBlockModel* p_DomainBlockModel, HWND h_View);
 	~DNS();
 	void create_WK();
 
 	un_map_DNSLogItem get_un_map_DNSLogItem();
+
+	void close();
+	void delete_p_WK__p_WK_GQCS();
 
 private:
 	SOCKET soc = NULL;
@@ -27,5 +30,7 @@ private:
 
 	DomainBlockModel* p_DomainBlockModel = nullptr;
 	ProxyID_Store* p_ProxyID_Store = nullptr;
+
+	HWND h_View = nullptr;
 };
 

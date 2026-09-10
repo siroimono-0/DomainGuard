@@ -7,6 +7,7 @@
 #include "DomainGuard2.h"
 
 #include "MainFrm.h"
+#include "AppContext.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -18,6 +19,13 @@ IMPLEMENT_DYNCREATE(CMainFrame, CFrameWnd)
 
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
+	ON_WM_CLOSE()
+	ON_MESSAGE(WM_FINISHED_WK_DELETE,
+		&CMainFrame::On_WM_FINISHED_WK_DELETE)
+
+	ON_MESSAGE(WM_FINISHED_APPCONTEXT_DELETE ,
+		&CMainFrame::On_WM_FINISHED_APPCONTEXT_DELETE)
+
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -56,7 +64,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		TRACE0("상태 표시줄을 만들지 못했습니다.\n");
 		return -1;      // 만들지 못했습니다.
 	}
-	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
+	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators) / sizeof(UINT));
 
 	// TODO: 도구 모음을 도킹할 수 없게 하려면 이 세 줄을 삭제하십시오.
 	m_wndToolBar.EnableDocking(CBRS_ALIGN_ANY);
@@ -69,7 +77,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
-	if( !CFrameWnd::PreCreateWindow(cs) )
+	if (!CFrameWnd::PreCreateWindow(cs))
 		return FALSE;
 	// TODO: CREATESTRUCT cs를 수정하여 여기에서
 	//  Window 클래스 또는 스타일을 수정합니다.
@@ -94,3 +102,27 @@ void CMainFrame::Dump(CDumpContext& dc) const
 
 // CMainFrame 메시지 처리기
 
+
+void CMainFrame::OnClose()
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	this->p_AppContext->close(this->GetSafeHwnd());
+	//CFrameWnd::OnClose();
+}
+
+void CMainFrame::set_p_AppContext(AppContext* p_AppContext)
+{
+	this->p_AppContext = p_AppContext;
+}
+
+LRESULT CMainFrame::On_WM_FINISHED_WK_DELETE(WPARAM wParam, LPARAM lParam)
+{
+	this->p_AppContext->delete_ALL();
+	return 0;
+}
+
+LRESULT CMainFrame::On_WM_FINISHED_APPCONTEXT_DELETE(WPARAM wParam, LPARAM lParam)
+{
+	CFrameWnd::OnClose();
+	return 0;
+}

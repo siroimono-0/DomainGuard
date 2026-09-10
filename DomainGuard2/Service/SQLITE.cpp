@@ -92,3 +92,8 @@ Q_Finished_Data SQLITE::tryPop_WK_Q()
 	return std::move(data);
 }
 
+void SQLITE::delete_WK()
+{
+	delete this->p_wk;
+	TRACE(_T("\nSQLITE::delete_WK\n"));
+}

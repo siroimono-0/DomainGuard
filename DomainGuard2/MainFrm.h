@@ -3,6 +3,7 @@
 //
 
 #pragma once
+class AppContext;
 
 class CMainFrame : public CFrameWnd
 {
@@ -22,7 +23,13 @@ public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 
 // 구현입니다.
+private:
+	AppContext* p_AppContext = nullptr;
 public:
+	void set_p_AppContext(AppContext* p_AppContext);
+	LRESULT On_WM_FINISHED_WK_DELETE (WPARAM wParam, LPARAM lParam);
+	LRESULT On_WM_FINISHED_APPCONTEXT_DELETE (WPARAM wParam, LPARAM lParam);
+
 	virtual ~CMainFrame();
 #ifdef _DEBUG
 	virtual void AssertValid() const;
@@ -38,6 +45,8 @@ protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	DECLARE_MESSAGE_MAP()
 
+public:
+	afx_msg void OnClose();
 };
 
 

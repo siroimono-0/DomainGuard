@@ -44,6 +44,12 @@ BEGIN_MESSAGE_MAP(CDomainGuard2View, CFormView)
 	ON_MESSAGE(WM_CLICKED_FROM_CWFPLISTCTRL,
 		&CDomainGuard2View::On_Clicked_FROM_CWFPListCtrl)
 
+	ON_MESSAGE(WM_DELETE_WK_DNS_FROM_WK_DNS,
+		&CDomainGuard2View::On_WM_DELETE_WK_DNS_FROM_WK_DNS)
+
+	ON_MESSAGE(WM_DELETE_WK_GQCS_DNS_FROM_WK_GQCS_DNS,
+		&CDomainGuard2View::On_WM_DELETE_WK_GQCS_DNS_FROM_WK_GQCS_DNS)
+
 	//ON_MESSAGE(WM_DELETE_FROM_CBLOCKLISTCTRL,
 		//&CDomainGuard2View::On_SELECT_INIT_FROM_WK_SQLITE)
 	ON_WM_TIMER()
@@ -142,6 +148,10 @@ void CDomainGuard2View::OnDomainInsert()
 {
 	Dia_INSERT dia;
 	dia.DoModal();
+	if (dia.editText == "")
+	{
+		return;
+	}
 	this->p_Controller->insert_To_SQLITE(dia.editText);
 }
 
@@ -230,6 +240,18 @@ LRESULT CDomainGuard2View::On_Clicked_FROM_CWFPListCtrl(WPARAM wParam, LPARAM lP
 
 	this->p_Controller->push_SQL_To_SQLITE(cnvType, s_filePath);
 	this->p_Controller->deleteBlockFilter_To_WFP(s_filePath);
+	return 0;
+}
+
+LRESULT CDomainGuard2View::On_WM_DELETE_WK_DNS_FROM_WK_DNS(WPARAM wParam, LPARAM lParam)
+{
+	this->p_Controller->delete_WK_DNS_OK();
+	return 0;
+}
+
+LRESULT CDomainGuard2View::On_WM_DELETE_WK_GQCS_DNS_FROM_WK_GQCS_DNS(WPARAM wParam, LPARAM lParam)
+{
+	this->p_Controller->delete_WK_GQCS_DNS_OK();
 	return 0;
 }
 

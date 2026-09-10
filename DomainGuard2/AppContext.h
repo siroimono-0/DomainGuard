@@ -12,6 +12,7 @@ class WFP;
 class WFPModel;
 class CalloutDriverClient;
 class DriverLogModel;
+class CMainFrame;
 
 class AppContext
 {
@@ -22,7 +23,11 @@ public:
 	void assembly();
 
 	void start_Timer();
+
+	void close(HWND h_MainFrame);
+	void delete_ALL();
 private:
+	HWND h_MainFrame = nullptr;
 
 	CDomainGuard2Doc* p_Doc;
 	CDomainGuard2View* p_View;

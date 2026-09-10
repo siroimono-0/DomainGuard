@@ -36,15 +36,15 @@ void CWFPListCtrl::PreSubclassWindow()
 	);
 	this->InsertColumn(
 		0,
-		_T("파일 경로"),
+		_T("FilePath"),
 		LVCFMT_CENTER, 250);
 	this->InsertColumn(
 		1,
-		_T("방향"),
+		_T("Direction"),
 		LVCFMT_CENTER, 100);
 	this->InsertColumn(
 		2,
-		_T("프로토콜"),
+		_T("Protocol"),
 		LVCFMT_CENTER, 100);
 	this->InsertColumn(
 		3,
@@ -52,13 +52,25 @@ void CWFPListCtrl::PreSubclassWindow()
 		LVCFMT_CENTER, 100);
 	this->InsertColumn(
 		4,
-		_T("포트"),
+		_T("Port"),
 		LVCFMT_CENTER, 100);
 	this->InsertColumn(
 		5,
-		_T("삭제"),
-		LVCFMT_CENTER, 50);
+		_T("Delete"),
+		LVCFMT_CENTER, 100);
 
+	CRect client;
+	GetClientRect(&client);
+
+	int columnsWidth = 0;
+
+	for (int i = 1; i < 6; i++)
+	{
+		columnsWidth += GetColumnWidth(i);
+	}
+
+	int filePathWidth = client.Width() - columnsWidth;
+	SetColumnWidth(0, filePathWidth);
 	//RedrawWindow();
 	return;
 }

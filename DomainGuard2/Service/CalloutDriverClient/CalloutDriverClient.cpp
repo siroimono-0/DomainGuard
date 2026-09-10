@@ -59,6 +59,16 @@ void CalloutDriverClient::close()
 		{
 			TRACE(_T("close ___ ERR %d"), ::GetLastError());
 		}
+
+		// 도메인 삭제 처리가 끝난 뒤 추가
+		if (::CloseHandle(h_CalloutDriver))
+		{
+			h_CalloutDriver = INVALID_HANDLE_VALUE;
+		}
+		else
+		{
+			TRACE(_T("CloseHandle ERR: %lu\n"), ::GetLastError());
+		}
 	}
 }
 

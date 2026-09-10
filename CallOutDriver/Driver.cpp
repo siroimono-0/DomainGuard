@@ -177,29 +177,40 @@ NTSTATUS DispatchDeviceControl(
 	ULONG ioctlCode = stack->Parameters.DeviceIoControl.IoControlCode;
 	//ULONG inputLength = stack->Parameters.DeviceIoControl.InputBufferLength;
 
+	size_t _size = 0;
+
 	if (ioctlCode == IOCTL_ADD_DOMAIN)
 	{
 		KdPrint(("DomainGuard: DispatchDeviceControl - IOCTL_ADD_DOMAIN called\n"));
-		addDomain(irp, stack);
-		status = STATUS_SUCCESS;
+		status = addDomain(irp, stack);
+		_size = 0;
 	}
 	else if (ioctlCode == IOCTL_REMOVE_DOMAIN)
 	{
 		KdPrint(("DomainGuard: DispatchDeviceControl -  IOCTL_REMOVE_DOMAIN called\n"));
-		removeDomain(irp, stack);
-		status = STATUS_SUCCESS;
+		status = removeDomain(irp, stack);
+		_size = 0;
 	}
 	else if (ioctlCode == IOCTL_KDPRINT_DOMAIN)
 	{
 		KdPrint(("DomainGuard: DispatchDeviceControl -  IOCTL_KDPRINT_DOMAIN called\n"));
 		KDPRINT_DOMAIN();
 		status = STATUS_SUCCESS;
+		_size = 0;
 	}
 	else if (ioctlCode == IOCTL_GET_ARR_DRIVERLOG)
 	{
 		KdPrint(("DomainGuard: DispatchDeviceControl - IOCTL_GET_ARR_DRIVERLOG called\n"));
-		get_ArrDriverLog(irp);
-		status = STATUS_SUCCESS;
+		RtlZeroMemory(irp->AssociatedIrp.SystemBuffer, sizeof(ARR_DRIVERLOG));
+		status = get_ArrDriverLog(irp, stack);
+		if (status != STATUS_SUCCESS)
+		{
+			_size = 0;
+		}
+		else
+		{
+			_size = sizeof(ARR_DRIVERLOG);
+		}
 	}
 	else
 	{
@@ -207,13 +218,20 @@ NTSTATUS DispatchDeviceControl(
 	}
 
 
-	return CompleteIrp(irp, status, 0);
+	return CompleteIrp(irp, status, _size);
 }
 
-void addDomain(PIRP p_irp, PIO_STACK_LOCATION p_stack)
+NTSTATUS addDomain(PIRP p_irp, PIO_STACK_LOCATION p_stack)
 {
-	UNREFERENCED_PARAMETER(p_stack);
+	//UNREFERENCED_PARAMETER(p_stack);
 	KdPrint(("DomainGuard: addDomain\n"));
+
+	ULONG inputLen = p_stack->Parameters.DeviceIoControl.InputBufferLength;
+	if (inputLen < sizeof(DOMAIN_REQUEST))
+	{
+		return STATUS_BUFFER_TOO_SMALL;
+	}
+
 	DOMAIN_REQUEST* p_Domain_Request = (DOMAIN_REQUEST*)p_irp->AssociatedIrp.SystemBuffer;
 	if (p_Domain_Request->block == true)
 	{
@@ -239,12 +257,19 @@ void addDomain(PIRP p_irp, PIO_STACK_LOCATION p_stack)
 		InsertTailList(&g_Q_Domain.head, &p_DOMAIN_REQUEST->link);
 		KeReleaseSpinLock(&g_Q_Domain.lock, oldIrql);
 	}
+	return STATUS_SUCCESS;
 }
 
-void removeDomain(PIRP p_irp, PIO_STACK_LOCATION p_stack)
+NTSTATUS removeDomain(PIRP p_irp, PIO_STACK_LOCATION p_stack)
 {
-	UNREFERENCED_PARAMETER(p_stack);
+	//UNREFERENCED_PARAMETER(p_stack);
 	KdPrint(("DomainGuard: removeDomain\n"));
+	ULONG inputLen = p_stack->Parameters.DeviceIoControl.InputBufferLength;
+	if (inputLen < sizeof(DOMAIN_REQUEST))
+	{
+		return STATUS_BUFFER_TOO_SMALL;
+	}
+
 	DOMAIN_REQUEST* p_Domain_Request = (DOMAIN_REQUEST*)p_irp->AssociatedIrp.SystemBuffer;
 
 	KIRQL oldIrql;
@@ -285,7 +310,7 @@ void removeDomain(PIRP p_irp, PIO_STACK_LOCATION p_stack)
 	{
 		ExFreePoolWithTag(remove_Entry, Q_Domain_Entry_Tag);
 	}
-	return;
+	return STATUS_SUCCESS;
 }
 
 void DriverUnload(
@@ -588,6 +613,11 @@ void NTAPI SniClassifyFn(const FWPS_INCOMING_VALUES0* inFixedValues,
 	if (sniRet == SNI_NEED_MORE)
 	{
 		KdPrint(("if (sniRet == SNI_NEED_MORE)\n"));
+
+		streamPacket->streamAction = FWPS_STREAM_ACTION_NEED_MORE_DATA;
+		streamPacket->countBytesRequired = (UINT32)reqSize;
+		streamPacket->countBytesEnforced = 0;
+		classifyOut->actionType = FWP_ACTION_CONTINUE;
 		// ÀÏ´Ü ³Ñ±è
 		return;
 	}
@@ -693,9 +723,16 @@ void addDriverLog(const char* sni)
 	return;
 }
 
-void get_ArrDriverLog(PIRP p_irp)
+NTSTATUS get_ArrDriverLog(PIRP p_irp, PIO_STACK_LOCATION p_stack)
 {
 	KdPrint(("DomainGuard: get_ArrDriverLog\n"));
+
+	ULONG inputLen = p_stack->Parameters.DeviceIoControl.InputBufferLength;
+	if (inputLen < sizeof(ARR_DRIVERLOG))
+	{
+		return STATUS_BUFFER_TOO_SMALL;
+	}
+
 	ARR_DRIVERLOG* p_ArrDriverLog =
 		(ARR_DRIVERLOG*)p_irp->AssociatedIrp.SystemBuffer;
 
@@ -721,7 +758,7 @@ void get_ArrDriverLog(PIRP p_irp)
 
 		if (remove_Entry != nullptr)
 		{
-			ExFreePoolWithTag(remove_Entry, Q_Domain_Entry_Tag);
+			ExFreePoolWithTag(remove_Entry, Q_DriverLog_Entry_Tag);
 		}
 
 		i++;
@@ -731,7 +768,7 @@ void get_ArrDriverLog(PIRP p_irp)
 		}
 		link = next;
 	}
-	KeReleaseSpinLock(&g_Q_Domain.lock, oldIrql);
+	KeReleaseSpinLock(&g_Q_DriverLog.lock, oldIrql);
 
 	return;
 }

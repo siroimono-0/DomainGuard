@@ -14,6 +14,8 @@
 // 이 클래스의 구현에 대해서는 DomainGuard2.cpp을(를) 참조하세요.
 //
 
+class AppContext;
+
 class CDomainGuard2App : public CWinApp
 {
 public:
@@ -28,6 +30,9 @@ public:
 // 구현입니다.
 	afx_msg void OnAppAbout();
 	DECLARE_MESSAGE_MAP()
+
+private:
+	AppContext* p_AppContext = nullptr;
 };
 
 extern CDomainGuard2App theApp;

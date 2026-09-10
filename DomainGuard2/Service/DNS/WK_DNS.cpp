@@ -7,7 +7,7 @@ using namespace std;
 
 WK_DNS::WK_DNS(SOCKET& soc, SOCKET& wsaSoc,
 	sockaddr_in addr_Sendto, HANDLE h_iocp, DomainBlockModel* p_Model,
-	ProxyID_Store* p_ProxyID_Store)
+	ProxyID_Store* p_ProxyID_Store, HWND h_View)
 {
 	this->soc = soc;
 	this->wsaSoc = wsaSoc;
@@ -15,6 +15,7 @@ WK_DNS::WK_DNS(SOCKET& soc, SOCKET& wsaSoc,
 	this->p_Model = p_Model;
 	this->h_Iocp = h_iocp;
 	this->p_ProxyID_Store = p_ProxyID_Store;
+	this->h_View = h_View;
 	this->start_Thread();
 }
 
@@ -28,6 +29,8 @@ UINT AFX_CDECL WK_DNS::th_Func(LPVOID vp)
 {
 	WK_DNS* p_this = (WK_DNS*)vp;
 	p_this->run();
+	TRACE(_T("\nClose WK_DNS Thread\n"));
+	::PostMessage(p_this->h_View, WM_DELETE_WK_DNS_FROM_WK_DNS, NULL, NULL);
 	return 0;
 }
 
@@ -42,7 +45,10 @@ void WK_DNS::run()
 
 		int recvLen = ::recvfrom(this->soc, (char*)buf, bufSize,
 			0, (sockaddr*)&clientAddr, &clientAddrSize);
-
+		if (strcmp((char*)buf, "stop") == 0)
+		{
+			break;
+		}
 		// ======================== proxyID 등록 ======================== 
 		// ======================== proxyID 등록 ======================== 
 		pendingContext _pendingContext = { 0 };

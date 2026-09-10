@@ -81,8 +81,9 @@ void NTAPI SniClassifyFn(const FWPS_INCOMING_VALUES0* inFixedValues,
 	FWPS_CLASSIFY_OUT0* classifyOut);
 
 
-void addDomain(PIRP p_irp, PIO_STACK_LOCATION p_stack);
-void removeDomain(PIRP p_irp, PIO_STACK_LOCATION p_stack);
+NTSTATUS addDomain(PIRP p_irp, PIO_STACK_LOCATION p_stack);
+NTSTATUS removeDomain(PIRP p_irp, PIO_STACK_LOCATION p_stack);
+NTSTATUS get_ArrDriverLog(PIRP p_irp, PIO_STACK_LOCATION p_stack);
 
 void init_Q_Domain();
 
@@ -90,7 +91,6 @@ bool isBlockedSni(char* sni);
 
 void addDriverLog(const char* sni);
 void init_Q_Driver(); 
-void get_ArrDriverLog(PIRP p_irp);
 
 
 

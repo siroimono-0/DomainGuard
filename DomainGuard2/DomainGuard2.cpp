@@ -126,7 +126,9 @@ BOOL CDomainGuard2App::InitInstance()
 	CDomainGuard2View* p_View = DYNAMIC_DOWNCAST(CDomainGuard2View, p_MainFrame->GetActiveView());
 	CDomainGuard2Doc* p_Doc = p_View->GetDocument();
 
-	AppContext appContext(p_Doc, p_View);
+	this->p_AppContext = new AppContext(p_Doc, p_View);
+	p_MainFrame->set_p_AppContext(this->p_AppContext);
+	//AppContext appContext(p_Doc, p_View);
 
 	// 창 하나만 초기화되었으므로 이를 표시하고 업데이트합니다.
 	m_pMainWnd->ShowWindow(SW_SHOW);

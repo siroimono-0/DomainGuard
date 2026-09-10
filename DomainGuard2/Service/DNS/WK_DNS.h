@@ -10,7 +10,7 @@ class WK_DNS
 public:
 	WK_DNS(SOCKET& soc, SOCKET& wsaSoc,
 		sockaddr_in addr_Sendto, HANDLE h_iocp, DomainBlockModel* p_Model,
-		ProxyID_Store* p_ProxyID_Store);
+		ProxyID_Store* p_ProxyID_Store, HWND h_View);
 	void start_Thread();
 	static UINT AFX_CDECL th_Func(LPVOID vp);
 	void run();
@@ -43,5 +43,7 @@ private:
 	ProxyID_Store* p_ProxyID_Store = nullptr;
 
 	uint16_t proxyID_cnt = 0;
+
+	HWND h_View = nullptr;
 };
 

@@ -6,7 +6,8 @@ class WK_DNS_GQCS
 {
 public:
 	WK_DNS_GQCS(SOCKET& soc, SOCKET& wsaSoc,
-		HANDLE h_Iocp, ProxyID_Store* p_ProxyID_Store);
+		HANDLE h_Iocp, ProxyID_Store* p_ProxyID_Store, 
+		HWND h_View);
 	void start_Thread();
 	static UINT AFX_CDECL th_Func(LPVOID vp);
 	void run();
@@ -21,5 +22,7 @@ private:
 	SOCKET wsaSoc = NULL;
 	HANDLE h_Iocp = NULL;
 	ProxyID_Store* p_ProxyID_Store = nullptr;
+
+	HWND h_View = nullptr;
 };
 

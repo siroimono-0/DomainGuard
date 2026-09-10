@@ -80,6 +80,13 @@ void Controller::finished_ResultQ()
 		this->p_Doc->set_SelectInit_To_WFPModel(std::move(data.vec_Info));
 
 	}
+	else if (data.sql_Type == sqlType::WK_delete)
+	{
+		this->p_SQLITE->delete_WK();
+		this->isDelete_p_SQLITE_WK = true;
+		this->close();
+	}
+
 	return;
 }
 
@@ -184,13 +191,82 @@ void Controller::get_DriverLog_To_CalloutDriverClient()
 	this->p_Doc->insert_To_DriverLogModel(arrDriverLog);
 }
 
- vecDriverLogItem Controller::get_vecDriverLog_To_Doc()
+vecDriverLogItem Controller::get_vecDriverLog_To_Doc()
 {
 	return this->p_Doc->get_vecDriverLog_To_DriverLogModel();
 }
 
+void Controller::delete_WK_DNS_OK()
+{
+	this->isDelete_p_DNS_WK = true;
+	if (this->isDelete_p_DNS_WK == true &&
+		this->isDelete_p_DNS_GQCS_WK == true)
+	{
+		this->delete_p_WK__p_WK_GQCS();
+	}
+	return;
+}
 
+void  Controller::delete_WK_GQCS_DNS_OK()
+{
+	this->isDelete_p_DNS_GQCS_WK = true;
+	if (this->isDelete_p_DNS_WK == true &&
+		this->isDelete_p_DNS_GQCS_WK == true)
+	{
+		this->delete_p_WK__p_WK_GQCS();
+	}
+	return;
+}
 
+void Controller::delete_p_WK__p_WK_GQCS()
+{
+	this->p_DNS->delete_p_WK__p_WK_GQCS();
+	this->close();
+	return;
+}
+
+void  Controller::set_h_MainFrame(HWND h_MainFrame)
+{
+	this->h_MainFrame = h_MainFrame;
+	return;
+}
+
+void Controller::close()
+{
+	if (this->isDelete_p_SQLITE_WK == false)
+	{
+		this->close_SQLITE();
+	}
+
+	if (this->isDelete_p_DNS_WK == false &&
+		this->isDelete_p_DNS_GQCS_WK == false)
+	{
+		this->close_DNS();
+	}
+
+	if (this->isDelete_p_SQLITE_WK == true &&
+		this->isDelete_p_DNS_WK == true &&
+		this->isDelete_p_DNS_GQCS_WK == true)
+	{
+		::PostMessage(this->h_MainFrame, WM_FINISHED_WK_DELETE, NULL, NULL);
+	}
+
+	return;
+}
+
+void Controller::close_SQLITE()
+{
+	sql_Q_Job job;
+	job.type = sqlType::close;
+	this->p_SQLITE->push_WK_Q(job);
+	return;
+}
+
+void  Controller::close_DNS()
+{
+	this->p_DNS->close();
+	return;
+}
 
 
 

@@ -23,6 +23,11 @@ UINT AFX_CDECL WK_SQLITE::th_Func(LPVOID vp)
 {
 	WK_SQLITE* p_this = (WK_SQLITE*)vp;
 	p_this->run();
+	Q_Finished_Data finish;
+	finish.sql_Type = sqlType::WK_delete;
+	p_this->p_ResultQ->push(finish);
+	TRACE(_T("\nClose WK_SQLITE Thread\n"));
+	::PostMessage(p_this->handle_View, WM_QFINISHED_FROM_WK_SQLITE, NULL, NULL);
 	return 0;
 }
 
@@ -72,6 +77,10 @@ void WK_SQLITE::run()
 				else if (data.type == sqlType::wfpSelect_Init)
 				{
 					this->wfp_DB_Select_Init();
+				}
+				else if (data.type == sqlType::close)
+				{
+					return;
 				}
 
 			}

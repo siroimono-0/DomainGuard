@@ -41,6 +41,7 @@ SNI_RET SNI_Paser(
 	if (dataLen < 5)
 	{
 		KdPrint(("if (dataLen < 5)\n"));
+		*reqSize = 5;
 		return SNI_NEED_MORE;
 	}
 

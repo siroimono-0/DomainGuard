@@ -92,7 +92,11 @@ void CDriverLogCtrl::PreSubclassWindow()
 		_T("Result"),
 		LVCFMT_CENTER, 200);
 
+	CRect client;
+	GetClientRect(&client);
 
+	int SNI_Width = client.Width() - GetColumnWidth(0) - GetColumnWidth(2);
+	SetColumnWidth(1, SNI_Width);
 	//RedrawWindow();
 	return;
 }

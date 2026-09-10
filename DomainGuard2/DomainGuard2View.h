@@ -61,6 +61,8 @@ public:
 	LRESULT On_SELECT_INIT_FROM_WK_SQLITE(WPARAM wParam, LPARAM lParam);
 	LRESULT On_Clicked_FROM_CBlockListCtrl(WPARAM wParam, LPARAM lParam);
 	LRESULT On_Clicked_FROM_CWFPListCtrl(WPARAM wParam, LPARAM lParam);
+	LRESULT On_WM_DELETE_WK_DNS_FROM_WK_DNS(WPARAM wParam, LPARAM lParam);
+	LRESULT On_WM_DELETE_WK_GQCS_DNS_FROM_WK_GQCS_DNS(WPARAM wParam, LPARAM lParam);
 
 private:
 	Controller* p_Controller = nullptr;
