@@ -150,41 +150,6 @@ cd DomainGuard
 3. `DomainGuard2`와 `CallOutDriver` 프로젝트의 SDK·도구 집합 설정을 확인합니다.
 4. 아래의 현재 코드 보완 사항을 반영한 뒤 솔루션을 빌드합니다.
 
-현재 main의 `Driver.cpp`에는 `NTSTATUS` 반환 함수인 `addDomain()`과 `get_ArrDriverLog()`에 값 없는 `return;`이 있어 반환값 보완이 필요합니다. 이 README의 빌드 안내는 소스와 프로젝트 설정을 기준으로 작성했으며, 빌드·실행 성공을 검증한 결과는 아닙니다.
-
-### 드라이버 로드와 GUI 실행
-
-현재 GUI의 드라이버 자동 로드·언로드 호출은 주석 처리되어 있습니다. SNI 검사를 사용하려면 **드라이버를 먼저 로드한 뒤 GUI를 실행**해야 합니다.
-
-커널 드라이버는 실행 환경에 맞는 서명이 필요합니다. 개발용 테스트 서명과 로드 환경은 [Microsoft 테스트 서명 안내](https://learn.microsoft.com/en-us/windows-hardware/drivers/install/the-testsigning-boot-configuration-option)를 참고하세요.
-
-서명과 빌드가 끝난 뒤, 저장소 루트의 관리자 PowerShell에서 실행하는 예시입니다. `.sys` 경로는 실제 빌드 결과에 맞게 지정합니다.
-
-```powershell
-# 최초 등록 시 실행합니다.
-$driverPath = (Resolve-Path ".\x64\Debug\CallOutDriver.sys").Path
-sc.exe create CallOutDriver type= kernel start= demand binPath= "$driverPath"
-
-sc.exe start CallOutDriver
-sc.exe query CallOutDriver
-
-# 드라이버가 실행 중인 상태에서 GUI를 시작합니다.
-Start-Process ".\x64\Debug\DomainGuard2.exe" -Verb RunAs
-```
-
-이미 `CallOutDriver` 서비스가 등록되어 있다면 등록 단계를 생략하고 기존 서비스의 경로를 확인합니다. GUI 시작 시 SNI V4/V6의 커널 등록 상태가 `YES`인지 확인합니다.
-
-**DNS 설정 변경:** 실행 시 IPv4 기본 게이트웨이가 있는 어댑터의 DNS 서버를 `127.0.0.1`로 변경합니다. 정상 종료 시에는 `8.8.8.8`로 설정하며, 실행 전 DNS 설정을 저장하거나 복원하지 않습니다. 기존에 지정한 DNS가 필요하면 실행 전에 값을 확인해 두고 종료 후 다시 설정해야 합니다.
-
-정책 DB인 `sqlite.db`는 프로그램의 현재 작업 디렉터리에 생성됩니다. 같은 정책을 계속 사용하려면 실행할 때 작업 디렉터리를 일정하게 유지합니다.
-
-테스트 종료 후 GUI를 닫고 드라이버를 중지할 수 있습니다.
-
-```powershell
-sc.exe stop CallOutDriver
-# 드라이버 등록을 제거할 때만 실행합니다.
-sc.exe delete CallOutDriver
-```
 
 ### 기능 확인 예시
 
@@ -202,20 +167,6 @@ sc.exe delete CallOutDriver
 
 SNI만 검사하려면 테스트 클라이언트의 프로그램 차단 규칙을 해제하고, TCP 기반 TLS와 평문 SNI를 사용해야 합니다. `curl.exe --http1.1 --resolve` 등을 사용하면 DNS 차단과 구분해서 확인할 수 있습니다.
 
-## 현재 범위와 개선 항목
-
-아래 내용은 `main`의 [`7a54438`](https://github.com/siroimono-0/DomainGuard/commit/7a54438) 소스를 기준으로 합니다.
-
-| 항목 | 현재 범위 / 개선 방향 |
-| --- | --- |
-| Windows Service 분리 | DNS 처리와 WFP 세션은 GUI 프로세스에 속합니다. GUI 종료 후 차단을 유지하는 독립 서비스 분리는 개선 항목입니다. |
-| DNS 프록시 | IPv4 UDP 기반이며 업스트림은 `8.8.8.8:53`으로 고정되어 있습니다. TCP·IPv6 프록시와 업스트림 설정 확장이 필요합니다. |
-| DNS 우회 방지 | 외부 TCP/UDP 53번 포트 질의를 제한합니다. DoH·DoT 등 다른 경로의 DNS 통신 전체를 차단하는 기능은 아닙니다. |
-| SNI 검사 | TCP/443의 해석 가능한 ClientHello를 대상으로 합니다. QUIC/HTTP3, ECH로 암호화된 내부 서버 이름, 여러 TLS 레코드에 걸친 ClientHello 재조립은 지원 범위에 포함하지 않습니다. |
-| 로그 | DNS 로그는 메모리·화면에 표시하며 DB 영속 저장은 하지 않습니다. SNI 차단 로그의 IOCTL 수신 경로는 아래 보완이 필요합니다. |
-| 설정 복원 | 종료 시 DNS를 `8.8.8.8`로 지정합니다. 기존 DNS 백업·복원과 비정상 종료 후 복구가 개선 항목입니다. |
-
-드라이버의 SNI 로그 조회 함수는 입력 버퍼 길이를 검사하지만, GUI 클라이언트는 출력 버퍼만 전달합니다. 로그 수신을 사용하려면 이 버퍼 계약과 반환 처리를 맞춰야 합니다. 관련 구현은 [드라이버](CallOutDriver/Driver.cpp)의 `get_ArrDriverLog()`와 [클라이언트](DomainGuard2/Service/CalloutDriverClient/CalloutDriverClient.cpp)의 `get_DriverLog()`에 있습니다.
 
 ## 디렉터리 구조
 
