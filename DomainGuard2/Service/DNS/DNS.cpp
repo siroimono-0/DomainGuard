@@ -9,6 +9,9 @@
 #include <WS2tcpip.h>
 #pragma comment(lib, "Ws2_32.lib")
 
+#include <shellapi.h>
+#pragma comment(lib, "Shell32.lib")
+
 DNS::DNS(DomainBlockModel* p_DomainBlockModel, HWND h_View)
 {
 	this->h_View = h_View;
@@ -37,6 +40,7 @@ DNS::DNS(DomainBlockModel* p_DomainBlockModel, HWND h_View)
 
 DNS::~DNS()
 {
+	this->powershell_DNS_Setting_end();
 	return;
 }
 
@@ -75,8 +79,185 @@ void DNS::create_WK()
 		addr_Sendto, this->h_Iocp, this->p_DomainBlockModel, this->p_ProxyID_Store, this->h_View);
 
 	this->p_WK_GQCS = new WK_DNS_GQCS(this->soc, this->wsaSoc, this->h_Iocp,
-		 this->p_ProxyID_Store, this->h_View);
+		this->p_ProxyID_Store, this->h_View);
+
+	this->powershell_DNS_Setting_Begin();
 	return;
+}
+
+bool DNS::powershell_DNS_Setting_Begin()
+{
+	WCHAR sysDir[MAX_PATH] = {};
+	UINT len = ::GetSystemDirectory(sysDir, MAX_PATH);
+	if (len == 0 || len >= MAX_PATH)
+	{
+		return false;
+	}
+
+	CString powershellPath(sysDir);
+	powershellPath +=
+		L"\\WindowsPowerShell\\v1.0\\powershell.exe";
+
+	const WCHAR* arguments =
+		L"-NoProfile -NonInteractive -Command \""
+		L"try { "
+
+		// 오류 발생 시 catch로 이동
+		L"$ErrorActionPreference = 'Stop'; "
+
+		// 연결된 일반 어댑터 중
+		// IPv4 기본 게이트웨이가 있는 어댑터들을 조회
+		L"$adapters = @(Get-NetIPConfiguration | "
+		L"Where-Object { $_.IPv4DefaultGateway -ne $null }); "
+
+		// 변경할 대상이 없으면 종료
+		L"if ($adapters.Count -eq 0) { exit 2 }; "
+
+		// 조회된 모든 대상 어댑터에 적용
+		L"foreach ($adapter in $adapters) { "
+
+		L"Set-DnsClientServerAddress "
+		L"-InterfaceIndex $adapter.InterfaceIndex "
+		L"-ServerAddresses '127.0.0.1' "
+		L"-ErrorAction Stop; "
+
+		L"}; "
+
+		// 모두 성공
+		L"exit 0 "
+
+		L"} catch { "
+		L"exit 1 "
+		L"}\"";
+
+	SHELLEXECUTEINFOW info = {};
+	info.cbSize = sizeof(info);
+
+	// 실행한 PowerShell의 프로세스 핸들을 받음
+	info.fMask = SEE_MASK_NOCLOSEPROCESS;
+
+	info.lpVerb = L"runas";  // 관리자 권한으로 실행
+	info.lpFile = powershellPath.GetString();
+	info.lpParameters = arguments;
+	info.nShow = SW_HIDE;    // PowerShell 창 숨김(UAC 창은 표시될 수 있음)
+	//info.nShow = SW_SHOW;    // PowerShell 창 숨김(UAC 창은 표시될 수 있음)
+
+	if (!::ShellExecuteExW(&info))
+	{
+		DWORD error = ::GetLastError();
+
+		// 관리자 권한 요청 취소 등
+		TRACE(L"PowerShell 실행 실패: %lu\n", error);
+		return false;
+	}
+
+
+	if (info.hProcess == nullptr)
+		return false;
+
+	// PowerShell 명령이 끝날 때까지 대기
+	DWORD waitResult =
+		::WaitForSingleObject(info.hProcess, INFINITE);
+
+	DWORD exitCode = 1;
+	BOOL gotExitCode = FALSE;
+
+	if (waitResult == WAIT_OBJECT_0)
+	{
+		gotExitCode =
+			::GetExitCodeProcess(info.hProcess, &exitCode);
+	}
+
+	::CloseHandle(info.hProcess);
+
+	return gotExitCode && exitCode == 0;
+}
+
+bool DNS::powershell_DNS_Setting_end()
+{
+	WCHAR sysDir[MAX_PATH] = {};
+	UINT len = ::GetSystemDirectory(sysDir, MAX_PATH);
+	if (len == 0 || len >= MAX_PATH)
+	{
+		return false;
+	}
+
+	CString powershellPath(sysDir);
+	powershellPath +=
+		L"\\WindowsPowerShell\\v1.0\\powershell.exe";
+
+	const WCHAR* arguments =
+		L"-NoProfile -NonInteractive -Command \""
+		L"try { "
+
+		// 오류 발생 시 catch로 이동
+		L"$ErrorActionPreference = 'Stop'; "
+
+		// 연결된 일반 어댑터 중
+		// IPv4 기본 게이트웨이가 있는 어댑터들을 조회
+		L"$adapters = @(Get-NetIPConfiguration | "
+		L"Where-Object { $_.IPv4DefaultGateway -ne $null }); "
+
+		// 변경할 대상이 없으면 종료
+		L"if ($adapters.Count -eq 0) { exit 2 }; "
+
+		// 조회된 모든 대상 어댑터에 적용
+		L"foreach ($adapter in $adapters) { "
+
+		L"Set-DnsClientServerAddress "
+		L"-InterfaceIndex $adapter.InterfaceIndex "
+		L"-ServerAddresses '8.8.8.8' "
+		L"-ErrorAction Stop; "
+
+		L"}; "
+
+		// 모두 성공
+		L"exit 0 "
+
+		L"} catch { "
+		L"exit 1 "
+		L"}\"";
+
+	SHELLEXECUTEINFOW info = {};
+	info.cbSize = sizeof(info);
+
+	// 실행한 PowerShell의 프로세스 핸들을 받음
+	info.fMask = SEE_MASK_NOCLOSEPROCESS;
+
+	info.lpVerb = L"runas";  // 관리자 권한으로 실행
+	info.lpFile = powershellPath.GetString();
+	info.lpParameters = arguments;
+	info.nShow = SW_HIDE;    // PowerShell 창 숨김(UAC 창은 표시될 수 있음)
+
+	if (!::ShellExecuteExW(&info))
+	{
+		DWORD error = ::GetLastError();
+
+		// 관리자 권한 요청 취소 등
+		TRACE(L"PowerShell 실행 실패: %lu\n", error);
+		return false;
+	}
+
+
+	if (info.hProcess == nullptr)
+		return false;
+
+	// PowerShell 명령이 끝날 때까지 대기
+	DWORD waitResult =
+		::WaitForSingleObject(info.hProcess, INFINITE);
+
+	DWORD exitCode = 1;
+	BOOL gotExitCode = FALSE;
+
+	if (waitResult == WAIT_OBJECT_0)
+	{
+		gotExitCode =
+			::GetExitCodeProcess(info.hProcess, &exitCode);
+	}
+
+	::CloseHandle(info.hProcess);
+
+	return gotExitCode && exitCode == 0;
 }
 
 un_map_DNSLogItem DNS::get_un_map_DNSLogItem()

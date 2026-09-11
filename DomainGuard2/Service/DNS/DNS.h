@@ -17,6 +17,10 @@ public:
 	void close();
 	void delete_p_WK__p_WK_GQCS();
 
+	bool powershell_DNS_Setting_Begin();
+	bool powershell_DNS_Setting_end();
+
+
 private:
 	SOCKET soc = NULL;
 	WSADATA wsaData = {};
