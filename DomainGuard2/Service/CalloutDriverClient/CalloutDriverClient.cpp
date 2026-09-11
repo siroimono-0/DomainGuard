@@ -8,12 +8,13 @@
 
 CalloutDriverClient::CalloutDriverClient(DomainBlockModel* p_DomainBlock_Model)
 {
+	/*
 	DWORD errCode = 0;
 	bool ret = this->calloutDriver_Load(&errCode);
 	if (ret == false)
 	{
 		TRACE(_T("\n\n this->calloutDriver_Load(&errCode); ___ %d \n\n"), errCode);
-	}
+	}*/
 
 	this->p_DomainBlock_Model = p_DomainBlock_Model;
 	this->open();
@@ -22,12 +23,13 @@ CalloutDriverClient::CalloutDriverClient(DomainBlockModel* p_DomainBlock_Model)
 CalloutDriverClient::~CalloutDriverClient()
 {
 	this->close();
+	/*
 	DWORD errCode = 0;
 	bool ret = this->calloutDriver_Unload(&errCode);
 	if (ret == false)
 	{
 		TRACE(_T("\n\n this->calloutDriver_Unload(&errCode); ___ %d \n\n"), errCode);
-	}
+	}*/
 }
 
 std::vector<string> CalloutDriverClient::paser(std::string s, char de)

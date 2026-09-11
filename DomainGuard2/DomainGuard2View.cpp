@@ -55,6 +55,8 @@ BEGIN_MESSAGE_MAP(CDomainGuard2View, CFormView)
 	ON_WM_TIMER()
 	ON_COMMAND(ID_WFP_ADD, &CDomainGuard2View::OnWfpAdd)
 	ON_COMMAND(ID_TEST_TEST, &CDomainGuard2View::OnTestTest)
+	ON_BN_CLICKED(IDC_BUTTON_ADD_BLOCKDOMAIN, &CDomainGuard2View::OnClickedButtonAddBlockdomain)
+	ON_BN_CLICKED(IDC_BUTTON_ADD_EXE, &CDomainGuard2View::OnClickedButtonAddExe)
 END_MESSAGE_MAP()
 
 // CDomainGuard2View 생성/소멸
@@ -300,6 +302,18 @@ void CDomainGuard2View::OnTestTest()
 {
 	this->p_Controller->test_Driver_Domain();
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+}
+
+void CDomainGuard2View::OnClickedButtonAddBlockdomain()
+{
+	this->OnDomainInsert();
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+void CDomainGuard2View::OnClickedButtonAddExe()
+{
+	this->OnWfpAdd();
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
 
 

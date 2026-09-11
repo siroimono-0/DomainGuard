@@ -73,7 +73,7 @@ void CDomainLogListCtrl::PreSubclassWindow()
 	GetClientRect(&client);
 
 	int columnsWidth = 0;
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		if (i == 2)
 		{
