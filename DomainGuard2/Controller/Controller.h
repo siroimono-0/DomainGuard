@@ -51,6 +51,7 @@ public:
 	void delete_WK_GQCS_DNS_OK();
 	void delete_p_WK__p_WK_GQCS();
 
+
 private:
 	HWND h_MainFrame = nullptr;
 

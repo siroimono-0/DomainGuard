@@ -51,6 +51,8 @@ void AppContext::assembly()
 	this->p_DomainBlockModel->set_handle_View(handle_View);
 	this->p_Doc->set_DomainBlockModel(this->p_DomainBlockModel);
 
+	this->p_CalloutDriver = new CalloutDriverClient(this->p_DomainBlockModel);
+
 	this->p_DNSLogItemModel = new DNSLogItemModel(handle_View);
 	this->p_Doc->set_p_DNSLogItemModel(this->p_DNSLogItemModel);
 
@@ -63,7 +65,6 @@ void AppContext::assembly()
 	this->p_ResultQ_SQLITE = new ResultQ_SQLITE();
 	this->p_Controller = new Controller();
 
-	this->p_CalloutDriver = new CalloutDriverClient(this->p_DomainBlockModel);
 	//this->p_SQLITE->set_handle_View(handle_View);
 	this->p_DNS = new DNS(this->p_DomainBlockModel, handle_View);
 	this->p_WFP = new WFP(this->p_WFPModel);

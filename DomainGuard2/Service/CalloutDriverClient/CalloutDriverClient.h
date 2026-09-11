@@ -21,10 +21,15 @@ public:
 	void test_Driver_Q_TEXT(); 
 	ARR_DRIVERLOG get_DriverLog();
 
+	bool calloutDriver_Load(DWORD* errCode);
+	std::vector<string> paser(std::string s, char de);
+	bool calloutDriver_Unload(DWORD* errCode);
+
 private:
 	HANDLE h_CalloutDriver = INVALID_HANDLE_VALUE;
 
 	DomainBlockModel* p_DomainBlock_Model;
 	//vecBlockDomain vec_BlockDomain;
+	CString serviceName = _T("CallOutDriver");
 };
 
