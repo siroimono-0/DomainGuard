@@ -79,6 +79,8 @@ public:
 	CWFPListCtrl WFPListCtrl;
 	afx_msg void OnTestTest();
 	CDriverLogCtrl driverLogCtrl;
+	afx_msg void OnClickedButtonAddBlockdomain();
+	afx_msg void OnClickedButtonAddExe();
 };
 
 #ifndef _DEBUG  // DomainGuard2View.cpp의 디버그 버전
